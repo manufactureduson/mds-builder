@@ -7,7 +7,7 @@ RUN apt update \
  && apt -y install build-essential  bash bc binutils build-essential bzip2 \
         cpio g++ gcc git gzip locales libncurses5-dev libdevmapper-dev \
         libsystemd-dev make mercurial whois patch perl python3 rsync sed \
-        tar vim unzip wget bison flex libssl-dev libfdt-dev curl file \
+        tar vim unzip wget bison flex libssl-dev libfdt-dev curl file swig\
     && rm -rf /var/lib/apt-lists/*
 
 

@@ -20,12 +20,12 @@ DOCKER_TAG ?= latest
 DOCKER_COMMAND := docker run -it --rm --volume="$${SSH_AUTH_SOCK}:/ssh-agent" --env="SSH_AUTH_SOCK=/ssh-agent" --volume="$(CURDIR):$(CURDIR)" --workdir="$(CURDIR)" --cap-add=NET_ADMIN --device=/dev/net/tun --network=host $(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
 BUILDROOT_VERSION ?= 2023.11
 
-PAYLOAD_NAME ?= network_player
+MACHINE ?= network_player
 
-CONFIG_NAME=lmds_${PAYLOAD_NAME}_defconfig
+CONFIG_NAME=mds_${MACHINE}_defconfig
 CONFIG_FILE?=buildroot_config/${CONFIG_NAME}
-OUTPUT_DIR?=../output/${PAYLOAD_NAME}
-EXTERNAL_REPOSITORIES?=../../lmds_external
+OUTPUT_DIR?=../output/${MACHINE}
+EXTERNAL_REPOSITORIES?=../../mds_external
 BUILD_VERSION ?=  $(shell git describe --tags --dirty --always)
 
 ifeq ($(DOCKER), 1)
@@ -39,17 +39,17 @@ endif
 ### DEFAULT TARGET ###
 
 build: $(DEPS) br-downloads config ## Build target.
-	@echo ">>> Build target [${PAYLOAD_NAME}]"
+	@echo ">>> Build target [${MACHINE}]"
 	$(PREFIX) make -C build/buildroot-${BUILDROOT_VERSION} BR2_EXTERNAL=$(EXTERNAL_REPOSITORIES) O=$(OUTPUT_DIR)
 .PHONY: build
 
 sdk: build ## Build target. 
-	@echo ">>> Build SDK [${PAYLOAD_NAME}]"
-	$(PREFIX) make -C build/buildroot-${BUILDROOT_VERSION} BR2_EXTERNAL=$(EXTERNAL_REPOSITORIES) O=$(OUTPUT_DIR) BR2_SDK_PREFIX=sdk-lmds-${PAYLOAD_NAME}-${BUILD_VERSION} sdk
+	@echo ">>> Build SDK [${MACHINE}]"
+	$(PREFIX) make -C build/buildroot-${BUILDROOT_VERSION} BR2_EXTERNAL=$(EXTERNAL_REPOSITORIES) O=$(OUTPUT_DIR) BR2_SDK_PREFIX=sdk-mds-${MACHINE}-${BUILD_VERSION} sdk
 .PHONY: build
 
 build-%: $(DEPS) br-downloads ## Build specific package
-	@echo ">>> Build package [$*] for target [${PAYLOAD_NAME}]"
+	@echo ">>> Build package [$*] for target [${MACHINE}]"
 	$(PREFIX) make -C build/buildroot-${BUILDROOT_VERSION} BR2_EXTERNAL=$(EXTERNAL_REPOSITORIES) O=$(OUTPUT_DIR) $*
 .PHONY: build-%
 
@@ -71,7 +71,7 @@ clean: ## Clean output repository. It will wipe out all the intermediary files g
 .PHONY: clean
 
 ###Distribution rules ###
-DESTDIR?=./build/distribution/${PAYLOAD_NAME}
+DESTDIR?=./build/distribution/${MACHINE}
 
 ${DESTDIR}:
 	mkdir -p ${DESTDIR}
@@ -79,8 +79,8 @@ ${DESTDIR}:
 distrib: ${DESTDIR} ## Copy the output binary of Agenium into a distribution directory. Destination directory can be overriden by setting DESTDIR variable . e.g DESTDIR=build/agenium make distrib-agenium
 	mkdir -p ${DESTDIR}/image
 	mkdir -p ${DESTDIR}/sdk
-	cp build/output/${PAYLOAD_NAME}/images/rootfs.tar.xz ${DESTDIR}/image
-	cp build/output/${PAYLOAD_NAME}/images/sdk-lmds-${PAYLOAD_NAME}-${BUILD_VERSION}.tar.gz ${DESTDIR}/sdk
+	cp build/output/${MACHINE}/images/rootfs.tar.xz ${DESTDIR}/image
+	cp build/output/${MACHINE}/images/sdk-mds-${MACHINE}-${BUILD_VERSION}.tar.gz ${DESTDIR}/sdk
 
 .PHONY: distrib
 
