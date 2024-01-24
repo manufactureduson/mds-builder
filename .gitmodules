@@ -1,3 +1,6 @@
 [submodule "src/esp-hosted"]
 	path = src/esp-hosted
 	url = https://github.com/espressif/esp-hosted.git
+[submodule "src/linux"]
+	path = src/linux
+	url = git@gitlab.com:manufactureduson/linux.git
