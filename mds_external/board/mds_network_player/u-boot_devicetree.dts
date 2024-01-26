@@ -46,9 +46,28 @@
 	flash@0 {
 		#address-cells = <1>;
 		#size-cells = <1>;
-		compatible = "winbond,w25q128", "jedec,spi-nor";
+		compatible = "winbond,w25q128", "spi-nand";
 		reg = <0>;
 		spi-max-frequency = <40000000>;
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			/* reserved for future boot direct from NAND flash
+			 * (this would use the same layout as the 8MiB NOR flash)
+			 */
+			partition@0 {
+				label = "boot";
+				reg = <0 0x100000>;
+			};
+
+			/* recovery / install environment */
+			partition@100000 {
+				label = "rootfs";
+				reg = <0x100000 0x7F00000>;
+			};
+		};
 	};
 };
 
