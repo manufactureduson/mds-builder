@@ -8,6 +8,7 @@ RUN apt update \
         cpio g++ gcc git gzip locales libncurses5-dev libdevmapper-dev \
         libsystemd-dev make mercurial whois patch perl python3 rsync sed \
         tar vim unzip wget bison flex libssl-dev libfdt-dev curl file swig\
+        u-boot-tools \
     && rm -rf /var/lib/apt-lists/*
 
 
