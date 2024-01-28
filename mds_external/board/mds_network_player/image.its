@@ -20,7 +20,7 @@
                 };
                 initrd {
                         description = "Initrd";
-                        data = /incbin/("rootfs.cpio.zst");
+                        data = /incbin/("rootfs.cpio.gz");
                         type = "ramdisk";
                         arch = "arm";
                         os = "linux";

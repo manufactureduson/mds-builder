@@ -15,4 +15,6 @@ cp "$FIT_IMAGE_CFG" "$OUT_DIR"
 cd "$OUT_DIR"
 /usr/bin/mkimage -f image.its "${FIT_IMAGE_OUT}"
 
+"$BOARD_DIR"/mknandboot.sh "${OUT_DIR}"/u-boot-sunxi-with-spl.bin "${OUT_DIR}/spi-nand.bin"
+
 exit $?
