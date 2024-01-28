@@ -13,7 +13,6 @@
 	compatible = "licheepi,licheepi-nano", "allwinner,suniv-f1c100s";
 
 	aliases {
-		mmc0 = &mmc0;
 		serial0 = &uart0;
 		spi0 = &spi0;
 	};
@@ -30,13 +29,7 @@
 	};
 };
 
-&mmc0 {
-	broken-cd;
-	bus-width = <4>;
-	disable-wp;
-	status = "okay";
-	vmmc-supply = <&reg_vcc3v3>;
-};
+
 
 &spi0 {
 	pinctrl-names = "default";
@@ -54,15 +47,11 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 
-			/* reserved for future boot direct from NAND flash
-			 * (this would use the same layout as the 8MiB NOR flash)
-			 */
 			partition@0 {
 				label = "boot";
 				reg = <0 0x100000>;
 			};
 
-			/* recovery / install environment */
 			partition@100000 {
 				label = "rootfs";
 				reg = <0x100000 0x7F00000>;
