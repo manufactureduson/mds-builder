@@ -24,3 +24,9 @@ Power sources :
 
 Communication with ESP32-C2 : OK
 Used Arduino + UART, after pressing the reset button on the board, the ESP32-C2 sends a message on the UART.
+Problem : Unable to flash esp32-c3, the boot mode by default tries to download the firmware from the USB and not the UART. It seems that the mode can be changed by modifying GPIO8 pin. and pull this GPIO down.
+
+Flashing SPI Nand requires to modify the u-boot-with-spl.bin. This can be done by using the mknandboot.sh script. This is script is located in mds_external/board/mds_network_player and it comes from 
+- https://github.com/bamkrs/openwrt/blob/dolphinpi-spinand/target/linux/sunxi/image/gen_sunxi_spinand_onlyboot_img.sh
+- https://github.com/TiNredmc/u-boot/blob/v2020/f1c100_uboot_spinand.sh
+- https://tinlethax.wordpress.com/2021/04/11/lichee-pi-nano-with-w25n01gv-support-complete-guide/
