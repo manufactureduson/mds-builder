@@ -30,3 +30,9 @@ Flashing SPI Nand requires to modify the u-boot-with-spl.bin. This can be done b
 - https://github.com/bamkrs/openwrt/blob/dolphinpi-spinand/target/linux/sunxi/image/gen_sunxi_spinand_onlyboot_img.sh
 - https://github.com/TiNredmc/u-boot/blob/v2020/f1c100_uboot_spinand.sh
 - https://tinlethax.wordpress.com/2021/04/11/lichee-pi-nano-with-w25n01gv-support-complete-guide/
+
+SPL is booting correctly after executing f1c100_uboot_spinand.sh on u-boot-with-spl.bin. But it doesn't detect the 2nd stage after this. 
+That means that BootROM is able to load the SPL and run it, but SPI NAND boot is not supported completely in the SPL itself.
+Different solution has been pushed to mailing list : https://patchwork.ozlabs.org/project/uboot/cover/20221014030520.3067228-1-uwu@icenowy.me/
+
+Another one that looks supporting NAND boot : https://github.com/TiNredmc/u-boot/commits/v1.0

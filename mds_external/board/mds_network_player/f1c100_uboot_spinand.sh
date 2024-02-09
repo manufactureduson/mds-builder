@@ -23,7 +23,7 @@ fi
 SPLSIZE=$(od -An -t u4 -j16 -N4 "$UBOOT" | xargs)
 printf "SPLSIZE:%d(0x%x)\n" $SPLSIZE $SPLSIZE
 # The u-boot size is an uint32 at (0xd000 + 12) bytes offset uboot start offset 0xd000(52K)
-UBOOTSIZE=$(od --endian=big -An -t u4 -j$((53248 + 12)) -N4 "$UBOOT" | xargs)
+UBOOTSIZE=$(od --endian=big -An -t u4 -j$((32768 + 12)) -N4 "$UBOOT" | xargs)
 printf "UBOOTSIZE:%d(0x%x)\n" $UBOOTSIZE $UBOOTSIZE
 ALIGNCHECK=$(($PAGESIZE%1024))
 if [ "$ALIGNCHECK" -ne "0" ]; then
@@ -35,7 +35,7 @@ KPAGESIZE=$(($PAGESIZE/1024))
 SPLBLOCKS=25
 
 echo "Generating boot0 for boot part of max size 0x8000 SPLBLOCKS:$SPLBLOCKS"
-dd if="/dev/zero" of="$OUTPUT" bs=1024 count=$((52 - $SPLBLOCKS))
+dd if="/dev/zero" of="$OUTPUT" bs=1024 count=$((32 - $SPLBLOCKS))
 
 for splcopy in `seq 0 $SPLBLOCKS`;
 do
@@ -45,6 +45,6 @@ do
 done
 
 echo "Appending u-boot"
-dd if="$UBOOT" of="$OUTPUT" bs=1024 seek=52 skip=52 conv=notrunc
+dd if="$UBOOT" of="$OUTPUT" bs=1024 seek=32 skip=32 conv=notrunc
 sync
 echo "done"
