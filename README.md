@@ -36,3 +36,67 @@ That means that BootROM is able to load the SPL and run it, but SPI NAND boot is
 Different solution has been pushed to mailing list : https://patchwork.ozlabs.org/project/uboot/cover/20221014030520.3067228-1-uwu@icenowy.me/
 
 Another one that looks supporting NAND boot : https://github.com/TiNredmc/u-boot/commits/v1.0
+
+9/02/2024 : Boot fro SPI nand is ok
+Problem was that mknans=dboot.sh was incorrect. This script split the SPL to be loaded correctly by the BootROM. This was working, but after the bootROM, the SPL itself were not able to load u-boot payload. This has been fixed by correcting the script to load the u-boot size at the correct address.
+
+To flash the SPI NAND, the following command can be used : 
+
+load the u-boot-with-spl.bin in fel mode and write the output ok mknand.sh to address 0x80000000. This is the start of the RAM : 
+./sunxi-fel -p uboot images/u-boot-sunxi-with-spl.bin write 0x80000000 images/spi-nand.bin
+
+On a serial console, u-boot starts. The following command can be used to flash the SPI NAND :
+```
+mtd erase boot ; mtd write.raw boot 0x80000000
+```
+Then the board can be rebooted and the u-boot will boot from the SPI NAND.: 
+```
+reset
+```
+
+
+### UBI
+```
+ubiformat /dev/mtd1
+ubiattach -p /dev/mtd1
+ubimkvol /dev/ubi0 -N rootfs -m
+mount -t ubifs ubi:rootfs /mnt/
+
+umount /mnt
+ubidetach -p /dev/mtd1
+```
+
+In u-boot
+```
+ubi part rootfs
+
+```
+
+
+ubi0: attaching mtd1
+ubi0: scanning is finished
+ubi0: empty MTD device detected
+ubi0: attached mtd1 (name "rootfs", size 127 MiB)
+ubi0: PEB size: 131072 bytes (128 KiB), LEB size: 126976 bytes
+ubi0: min./max. I/O unit sizes: 2048/2048, sub-page size 2048
+ubi0: VID header offset: 2048 (aligned 2048), data offset: 4096
+ubi0: good PEBs: 1016, bad PEBs: 0, corrupted PEBs: 0
+ubi0: user volume: 0, internal volumes: 1, max. volumes count: 128
+ubi0: max/mean erase counter: 0/0, WL threshold: 4096, image sequence number: 1578400881
+ubi0: available PEBs: 992, total reserved PEBs: 24, PEBs reserved for bad PEB handling: 20
+ubi0: background thread "ubi_bgt0d" started, PID 218
+UBIFS error (pid: 229): cannot open "ubi:rootfs", error -19
+ubi: mtd1 is already attached to ubi0
+
+
+=> ubi part rootfs 2048
+ubi0: attaching mtd2
+ubi0: scanning is finished
+ubi0: attached mtd2 (name "rootfs", size 127 MiB)
+ubi0: PEB size: 131072 bytes (128 KiB), LEB size: 126976 bytes
+ubi0: min./max. I/O unit sizes: 2048/2048, sub-page size 2048
+ubi0: VID header offset: 2048 (aligned 2048), data offset: 4096
+ubi0: good PEBs: 1016, bad PEBs: 0, corrupted PEBs: 0
+ubi0: user volume: 1, internal volumes: 1, max. volumes count: 128
+ubi0: max/mean erase counter: 3/2, WL threshold: 4096, image sequence number: 1562993607
+ubi0: available PEBs: 0, total reserved PEBs: 1016, PEBs reserved for bad PEB handling: 20
