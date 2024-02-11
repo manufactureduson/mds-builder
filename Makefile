@@ -1,23 +1,29 @@
-# The following variables can be overridden.
-# You can define them on a "user.env" file, to
-# avoid giving them on each command line.
+
+# Detect build architecture
+BUILDARCH ?= $(shell uname -m)
+ifeq ($(BUILDARCH),aarch64)
+    BUILDARCH=arm64
+endif
+ifeq ($(BUILDARCH),x86_64)
+    BUILDARCH=amd64
+endif
 
 ifneq ($(wildcard user.env),)
-$(info )
-$(info Loading user variables file)
 include user.env
 endif
 
 # Use containerized environment
 DOCKER?=0
 
-USER = $$(id -un)
-UID = $$(id -u)
-GID = $$(id -g)
 
 DOCKER_IMAGE_NAME ?= build_virtual_payloads_image
 DOCKER_TAG ?= latest
-DOCKER_COMMAND := docker run -it --rm --volume="$${SSH_AUTH_SOCK}:/ssh-agent" --env="SSH_AUTH_SOCK=/ssh-agent" --volume="$(CURDIR):$(CURDIR)" --workdir="$(CURDIR)" --cap-add=NET_ADMIN --device=/dev/net/tun --network=host $(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
+DOCKER_COMMAND := docker run -it --rm \
+		--volume="$(CURDIR):$(CURDIR)" \
+		-v mds-builder-build:$(CURDIR)/build \
+		--workdir="$(CURDIR)" \
+		$(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
+
 BUILDROOT_VERSION ?= 2023.11
 
 MACHINE ?= network_player
@@ -90,10 +96,10 @@ distrib-clean: ## Remove the distribution directory
 ### DOWNLOADS Buildroot ###
 
 br-downloads: ## Download buildroot source code
-	if [  ! -d build/buildroot-* ]; then \
-		mkdir -p build ; \
-		curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xvz -C build/ ; \
-	fi
+	@echo ">>> Download buildroot source code"
+	## $(PREFIX) mkdir -p build
+	## $(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xvz -C build/
+	
 .PHONY: br-downloads
 
 ### DOCKER RULES ###
@@ -101,9 +107,8 @@ br-downloads: ## Download buildroot source code
 docker-image: Dockerfile ## Build Docker image
 	@docker build \
 		--ssh=default \
-		--build-arg="USER=$(USER)" \
-		--build-arg="UID=$(UID)" \
-		--build-arg="GID=$(GID)" \
+		--build-arg="USER_UID=$(shell id -u)" \
+		--build-arg="USER_GID=$(shell id -g)" \
 		--build-arg="PROJECT_PATH=$(CURDIR)" \
 		--tag=$(DOCKER_IMAGE_NAME):$(DOCKER_TAG) \
 		.
