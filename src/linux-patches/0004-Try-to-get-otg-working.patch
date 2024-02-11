@@ -1,0 +1,34 @@
+From 00ca088aa85cd41f9ebca1f34285128f69c41a50 Mon Sep 17 00:00:00 2001
+From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
+Date: Sun, 28 Jan 2024 23:35:58 +0100
+Subject: [PATCH 4/5] Try to get otg working
+
+---
+ .../dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+index 5041deb3d743..566ee054e7fb 100644
+--- a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
++++ b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+@@ -120,14 +120,16 @@ &uart0 {
+ };
+ 
+ &usb_otg {
+-	dr_mode = "peripheral";
++	dr_mode = "otg";
+ 	status = "okay";
+ };
+ 
+ &usbphy {
++	usb0_id_det-gpios = <&pio 5 0 GPIO_ACTIVE_HIGH>; /* PF0 */
+ 	status = "okay";
+ };
+ 
++
+ &spdif {
+ 	status = "okay";
+ };
+-- 
+2.39.2
+

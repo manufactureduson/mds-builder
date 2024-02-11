@@ -1,0 +1,180 @@
+From 229a3ba826fae6326986857aaaf99aa67bdb239b Mon Sep 17 00:00:00 2001
+From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
+Date: Wed, 24 Jan 2024 09:41:58 +0100
+Subject: [PATCH 2/5] Add support for f1c200s i2s and spdif
+
+---
+ .../arm/boot/dts/allwinner/suniv-f1c100s.dtsi |  15 ++-
+ ...univ-f1c200s-mds-network-streamer-v1.0.dts | 126 ++++++++++++++++++
+ 2 files changed, 140 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+
+diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
+index 7df350a9cb72..664deccb579a 100644
+--- a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
++++ b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
+@@ -3,8 +3,8 @@
+  * Copyright 2018 Icenowy Zheng <icenowy@aosc.io>
+  * Copyright 2018 Mesih Kilinc <mesihkilinc@gmail.com>
+  */
+-
+ #include <dt-bindings/clock/suniv-ccu-f1c100s.h>
++#include <dt-bindings/dma/sun4i-a10.h>
+ #include <dt-bindings/reset/suniv-ccu-f1c100s.h>
+ 
+ / {
+@@ -76,6 +76,19 @@ dma: dma-controller@1c02000 {
+ 			clocks = <&ccu CLK_BUS_DMA>;
+ 			#dma-cells = <2>;
+ 		};
++		
++		i2s0: i2s@1c22000 {
++			#sound-dai-cells = <0>;
++			compatible = "allwinner,sun4i-a10-i2s";
++			reg = <0x01c22400 0x400>;
++			interrupts = <35>;
++			clocks = <&ccu CLK_BUS_I2S0>, <&ccu CLK_I2S>;
++			clock-names = "apb", "i2s";
++			dmas = <&dma SUN4I_DMA_NORMAL 3>,
++			       <&dma SUN4I_DMA_NORMAL 3>;
++			dma-names = "rx", "tx";
++			status = "disabled";
++		};
+ 
+ 		spdif: spdif@1c21400 {
+ 			#sound-dai-cells = <0>;
+diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+new file mode 100644
+index 000000000000..7127742934d7
+--- /dev/null
++++ b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+@@ -0,0 +1,126 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2022 Icenowy Zheng <uwu@icenowy.me>
++ */
++
++/dts-v1/;
++#include "suniv-f1c100s.dtsi"
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/leds/common.h>
++
++/ {
++	model = "MDS Network Streamer v1.0";
++	compatible = "mds,network-streamer-v1.0",
++		     "allwinner,suniv-f1c200s";
++
++	aliases {
++		serial0 = &uart0;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	// leds {
++	// 	compatible = "gpio-leds";
++
++	// 	led {
++	// 		function = LED_FUNCTION_STATUS;
++	// 		color = <LED_COLOR_ID_GREEN>;
++	// 		gpios = <&pio 4 6 GPIO_ACTIVE_HIGH>; /* PE6 */
++	// 		linux,default-trigger = "heartbeat";
++	// 	};
++	// };
++
++	reg_vcc3v3: regulator-3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
++
++	es9023: pcm5102a {
++		compatible = "ti,pcm5102a";
++	};
++
++	spdif_out: spdif-out {
++		#sound-dai-cells = <0>;
++		compatible = "linux,spdif-dit";
++	};
++
++	sound-i2s {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "es9023";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,mclk-fs = <512>;
++
++		simple-audio-card,cpu {
++			sound-dai = <&i2s0>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&es9023>;
++		};
++	};
++
++	sound-spdif {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "On-board SPDIF";
++
++		simple-audio-card,cpu {
++			sound-dai = <&spdif>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&spdif_out>;
++		};
++	};
++};
++
++// &mmc0 {
++// 	cd-gpios = <&pio 4 3 GPIO_ACTIVE_LOW>; /* PE3 */
++// 	bus-width = <4>;
++// 	disable-wp;
++// 	vmmc-supply = <&reg_vcc3v3>;
++// 	status = "okay";
++// };
++
++&otg_sram {
++	status = "okay";
++};
++
++&spi0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&spi0_pc_pins>;
++	status = "okay";
++
++	flash@0 {
++		compatible = "spi-nand";
++		reg = <0>;
++		spi-max-frequency = <40000000>;
++	};
++};
++
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_pe_pins>;
++	status = "okay";
++};
++
++&usb_otg {
++	dr_mode = "peripheral";
++	status = "okay";
++};
++
++&usbphy {
++	status = "okay";
++};
++
++&spdif {
++	status = "okay";
++};
++
++&i2s0 {
++	status = "okay";
++};
+-- 
+2.39.2
+
