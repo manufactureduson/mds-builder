@@ -55,7 +55,7 @@ reset
 ```
 
 
-### UBI
+### UBI NOK
 ```
 ubiformat /dev/mtd1
 ubiattach -p /dev/mtd1
@@ -67,8 +67,91 @@ ubidetach -p /dev/mtd1
 ```
 
 In u-boot
+Error mounting ubifs partition + super slow to attache ubi 
 ```
-ubi part rootfs
+=> ubi part rootfs
+ubi0: attaching mtd2
+ubi0: scanning is finished
+ubi0: attached mtd2 (name "rootfs", size 127 MiB)
+ubi0: PEB size: 131072 bytes (128 KiB), LEB size: 126976 bytes
+ubi0: min./max. I/O unit sizes: 2048/2048, sub-page size 2048
+ubi0: VID header offset: 2048 (aligned 2048), data offset: 4096
+ubi0: good PEBs: 1016, bad PEBs: 0, corrupted PEBs: 0
+ubi0: user volume: 1, internal volumes: 1, max. volumes count: 128
+ubi0: max/mean erase counter: 1/0, WL threshold: 4096, image sequence number: 1738062171
+ubi0: available PEBs: 0, total reserved PEBs: 1016, PEBs reserved for bad PEB handling: 20
+=> ubi info l
+Volume information dump:
+        vol_id          0
+        reserved_pebs   992
+        alignment       1
+        data_pad        0
+        vol_type        3
+        name_len        6
+        usable_leb_size 126976
+        used_ebs        992
+        used_bytes      125960192
+        last_eb_bytes   126976
+        corrupted       0
+        upd_marker      0
+        skip_check      0
+        name            rootfs
+Volume information dump:
+        vol_id          2147479551
+        reserved_pebs   2
+        alignment       1
+        data_pad        0
+        vol_type        3
+        name_len        13
+        usable_leb_size 126976
+        used_ebs        2
+        used_bytes      253952
+        last_eb_bytes   2
+        corrupted       0
+        upd_marker      0
+        skip_check      0
+        name            layout volume
+=> ubi     
+  ubi ubifsload ubifsls ubifsmount ubifsumount
+=> ubi
+  ubi ubifsload ubifsls ubifsmount ubifsumount
+=> ubi
+  ubi ubifsload ubifsls ubifsmount ubifsumount
+=> ubifsmount rootfs
+UBIFS error (pid: 1): cannot open "rootfs", error -22
+Error reading superblock on volume 'rootfs' errno=-22!
+=> ubifsmount ubi0:rootfs
+UBIFS error (ubi0:0 pid 0): validate_sb: bad superblock, error 13
+        magic          0x6101831
+        crc            0x83e6525
+        node_type      6 (superblock node)
+        group_type     0 (no node group)
+        sqnum          2
+        len            4096
+        key_hash       0 (R5)
+        key_fmt        0 (simple)
+        flags          0x8
+        big_lpt        0
+        space_fixup    0
+        min_io_size    2048
+        leb_size       126976
+        leb_cnt        992
+        max_leb_cnt    992
+        max_bud_bytes  5713920
+        log_lebs       4
+        lpt_lebs       2
+        orph_lebs      2
+        jhead_cnt      1
+        fanout         8
+        lsave_cnt      256
+        default_compr  3
+        rp_size        5242880
+        rp_uid         0
+        rp_gid         0
+        fmt_version    5
+        time_gran      1000000000
+        UUID           83bc6bac
+Error reading superblock on volume 'ubi0:rootfs' errno=-22!
 
 ```
 
@@ -100,3 +183,31 @@ ubi0: good PEBs: 1016, bad PEBs: 0, corrupted PEBs: 0
 ubi0: user volume: 1, internal volumes: 1, max. volumes count: 128
 ubi0: max/mean erase counter: 3/2, WL threshold: 4096, image sequence number: 1562993607
 ubi0: available PEBs: 0, total reserved PEBs: 1016, PEBs reserved for bad PEB handling: 20
+
+### Mass Storage NOK
+```
+modprobe g_mass_storage iSerialNumber=123456 file=/mnt/fat32.part stall=0 removable=1
+
+losetup /dev/loop0 /mnt/fat32.part
+
+
+``` 
+### After u-boot config changes :
+
+Boot FEL ok
+Boot from NAND ok but not after hard reboot
+reset cmd not working :
+```
+=> reset
+resetting ...
+System reset not supported on this platform
+### ERROR ### Please RESET the board ###
+```
+bootm cmd not working :
+```
+=> bootm 0x80000000
+Wrong Image Type for bootm command
+ERROR -91: can't get kernel image!
+```
+
+Add support for FIT image and now OK !

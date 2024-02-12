@@ -13,8 +13,17 @@ echo "FIT_IMAGE_OUT: ${FIT_IMAGE_OUT}"
 
 cp "$FIT_IMAGE_CFG" "$OUT_DIR"
 cd "$OUT_DIR"
-/usr/bin/mkimage -f image.its "${FIT_IMAGE_OUT}"
+#/usr/bin/mkimage -f image.its "${FIT_IMAGE_OUT}"
 
 "$BOARD_DIR"/mknandboot.sh "${OUT_DIR}/spi-nand.bin" "${OUT_DIR}"/u-boot-sunxi-with-spl.bin 
+
+mkdir -p ${BUILD_DIR}/../../../../out
+
+echo ${OUT_DIR}/
+echo ${BUILD_DIR}/../../out
+echo ${TOP_DIR}
+echo "a ${TOPDIR}"
+
+cp ${OUT_DIR}/* ${BUILD_DIR}/../../../../out
 
 exit $?

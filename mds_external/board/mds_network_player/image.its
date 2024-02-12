@@ -25,6 +25,7 @@
                         arch = "arm";
                         os = "linux";
                         compression = "none";
+                        load = <0x82800000>;
                         hash {
                                 algo = "sha1";
                         };
@@ -35,8 +36,8 @@
                         type = "flat_dt";
                         arch = "arm";
                         compression = "none";
-                        load = <0x81FFA000>;
-                        entry = <0x81FFA000>;
+                        load = <0x81FF0000>;
+                        entry = <0x81FF0000>;
                         hash {
                                 algo = "sha1";
                         };
