@@ -16,7 +16,7 @@ endif
 DOCKER?=0
 
 
-DOCKER_IMAGE_NAME ?= build_virtual_payloads_image
+DOCKER_IMAGE_NAME ?= mds_builder_image
 DOCKER_TAG ?= latest
 DOCKER_COMMAND := docker run -it --rm \
 		--volume="$(CURDIR):$(CURDIR)" \
