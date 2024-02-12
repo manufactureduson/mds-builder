@@ -1,2 +1,4 @@
-build
+build/**
 user.env
+dl/**
+out/**
