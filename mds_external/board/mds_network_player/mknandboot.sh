@@ -22,7 +22,7 @@ fi
 #f1c100s modify CONFIG_SYS_SPI_U_BOOT_OFFS to 0xd000(52K)
 SPLSIZE=$(od -An -t u4 -j16 -N4 "$UBOOT" | xargs)
 printf "SPLSIZE:%d(0x%x)\n" $SPLSIZE $SPLSIZE
-# The u-boot size is an uint32 at (0xd000 + 12) bytes offset uboot start offset 0xd000(52K)
+# The u-boot size is an uint32 at (0x8000 + 12) bytes offset uboot start offset 0x8000(32KiB)
 UBOOTSIZE=$(od --endian=big -An -t u4 -j$((32768 + 12)) -N4 "$UBOOT" | xargs)
 printf "UBOOTSIZE:%d(0x%x)\n" $UBOOTSIZE $UBOOTSIZE
 ALIGNCHECK=$(($PAGESIZE%1024))
