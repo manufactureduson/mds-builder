@@ -16,11 +16,12 @@
 
 ## Checks
 
-Power sources : 
+Power sources :
+Need to tight OE to 5v 
 3v3 : OK
 5v : OK
 2.5v : OK
-1.1v : NOK
+1.1v : OK
 
 Communication with ESP32-C2 : OK
 Used Arduino + UART, after pressing the reset button on the board, the ESP32-C2 sends a message on the UART.
@@ -61,6 +62,7 @@ ubiformat /dev/mtd1
 ubiattach -p /dev/mtd1
 ubimkvol /dev/ubi0 -N rootfs -m
 mount -t ubifs ubi:rootfs /mnt/
+
 
 umount /mnt
 ubidetach -p /dev/mtd1
@@ -184,6 +186,80 @@ ubi0: user volume: 1, internal volumes: 1, max. volumes count: 128
 ubi0: max/mean erase counter: 3/2, WL threshold: 4096, image sequence number: 1562993607
 ubi0: available PEBs: 0, total reserved PEBs: 1016, PEBs reserved for bad PEB handling: 20
 
+
+#### UBI in linux : 
+Ok if everything is done from the target. ubiformating, volume creation and mounting
+But if trying to ubiupdatemkvol with ubifs created fron buildroot, it's not I got this error : 
+```
+root LMDS@/mnt/user# mount -t ubifs ubi:rootfs-a /mnt/rootfs-a
+[ 2650.990000] UBIFS (ubi0:0): Mounting in unauthenticated mode
+[ 2651.000000] UBIFS error (ubi0:0 pid 141): 0xc0239930: LEB size mismatch: 129024 in superblock, 126976 real
+[ 2651.010000] UBIFS error (ubi0:0 pid 141): 0xc0239940: bad superblock, error 1
+[ 2651.020000] 	magic          0x6101831
+[ 2651.020000] 	crc            0x9c2c3bcf
+[ 2651.020000] 	node_type      6 (superblock node)
+[ 2651.030000] 	group_type     0 (no node group)
+[ 2651.030000] 	sqnum          10881
+[ 2651.040000] 	len            4096
+[ 2651.040000] 	key_hash       0 (R5)
+[ 2651.040000] 	key_fmt        0 (simple)
+[ 2651.050000] 	flags          0x0
+[ 2651.050000] 	big_lpt        0
+[ 2651.050000] 	space_fixup    0
+[ 2651.060000] 	min_io_size    2048
+[ 2651.060000] 	leb_size       129024
+[ 2651.060000] 	leb_cnt        397
+[ 2651.070000] 	max_leb_cnt    2048
+[ 2651.070000] 	max_bud_bytes  8388608
+[ 2651.070000] 	log_lebs       5
+[ 2651.080000] 	lpt_lebs       2
+[ 2651.080000] 	orph_lebs      1
+[ 2651.080000] 	jhead_cnt      1
+[ 2651.090000] 	fanout         8
+[ 2651.090000] 	lsave_cnt      256
+[ 2651.090000] 	default_compr  1
+[ 2651.100000] 	rp_size        0
+[ 2651.100000] 	rp_uid         0
+[ 2651.100000] 	rp_gid         0
+[ 2651.110000] 	fmt_version    4
+[ 2651.110000] 	time_gran      1000000000
+[ 2651.110000] 	UUID           D9E29025-9B19-4531-AC50-AC54716A2606
+mount: mounting ubi:rootfs-a on /mnt/rootfs-a failed: Invalid argument
+```
+
+More specifically this error `LEB size mismatch: 129024 in superblock, 126976 real`. Looks like there is size mismatch ?
+
+In buildroot the Filesystem images menu configured ubifs like this : 
+
+LEB size : 0x1f800 = 129024
+Reasl is 0x1F000 = 126976
+
+Try to change buildroot size with this value and **OK**
+
+### ubiupdatebol
+
+ubiattach -p /dev/mtd1
+
+
+### FASTMAP
+enable FASTMAP in u-boot :
+
+on linux :
+```
+# ubiattach -p /dev/mtd1
+[   52.620000] ubi0: default fastmap pool size: 50
+[   52.620000] ubi0: default fastmap WL pool size: 25
+[   52.630000] ubi0: attaching mtd1
+```
+
+
+
+
+### Configure ether
+
+modprobe g_ether
+ifconfig usb0 192.168.2.2
+
 ### Mass Storage NOK
 ```
 modprobe g_mass_storage iSerialNumber=123456 file=/mnt/fat32.part stall=0 removable=1
@@ -211,3 +287,27 @@ ERROR -91: can't get kernel image!
 ```
 
 Add support for FIT image and now OK !
+
+
+### PS1
+```
+PS1='\[\e[0;31m\]\u\[\e[m\] \[\e[0;32m\]\h\[\e[m\]@\[\e[0;3
+4m\]\w\[\e[m\]\$ '
+```
+
+# Possible usage
+
+## Wall switch
+
+with round screen SPI + lvgl : wall switch usage
++ rotary knob
+
+
+## Binky
+
+with screen SPI + app lvgl : Internet radio + spotify
+
+## SDK for music application
+
+- Airplay 2
+- Spotify Connect
