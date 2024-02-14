@@ -6,5 +6,9 @@
    write-with-progress 0x80000000 out/uImage \
    write-with-progress 0x80400000 out/rootfs.cpio.uboot \
    write-with-progress 0x80FE0000 out/suniv-f1c200s-mds-network-streamer-v1.0.dtb
+   
+#   write-with-progress 0x80000000 out/rootfs.ubi
+
+
 
 echo "bootm 0x80000000 0x80400000 0x80FE0000"
