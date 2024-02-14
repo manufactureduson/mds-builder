@@ -1,7 +1,7 @@
-From d79420a93db89a1412cf8454b2f72674dfabee2d Mon Sep 17 00:00:00 2001
+From a9812db2a3750e2441272359ace38d3a06e509ca Mon Sep 17 00:00:00 2001
 From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
 Date: Sun, 11 Feb 2024 10:40:12 +0100
-Subject: [PATCH 5/5] fix: build
+Subject: [PATCH 5/6] fix: build
 
 ---
  arch/arm/mach-sunxi/spl_spi_sunxi.c | 7 +------

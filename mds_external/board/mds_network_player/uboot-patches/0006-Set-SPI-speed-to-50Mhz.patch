@@ -1,0 +1,30 @@
+From 477840e8ed63bef458a5b43176244b067fa5dc3f Mon Sep 17 00:00:00 2001
+From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
+Date: Wed, 14 Feb 2024 16:26:02 +0000
+Subject: [PATCH 6/6] Set SPI speed to 50Mhz
+
+---
+ drivers/spi/spi-sunxi.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/spi/spi-sunxi.c b/drivers/spi/spi-sunxi.c
+index c56d82d998..2d13070126 100644
+--- a/drivers/spi/spi-sunxi.c
++++ b/drivers/spi/spi-sunxi.c
+@@ -459,10 +459,12 @@ static int sun4i_spi_of_to_plat(struct udevice *bus)
+ 	plat->max_hz = fdtdec_get_int(gd->fdt_blob, node,
+ 				      "spi-max-frequency",
+ 				      SUN4I_SPI_DEFAULT_RATE);
+-
++	plat->max_hz = 50000000;
+ 	if (plat->max_hz > SUN4I_SPI_MAX_RATE)
+ 		plat->max_hz = SUN4I_SPI_MAX_RATE;
+ 
++	printf("SPI speeed : %d\n", plat->max_hz);
++
+ 	return 0;
+ }
+ 
+-- 
+2.39.2
+

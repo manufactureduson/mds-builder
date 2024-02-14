@@ -1,7 +1,7 @@
-From f9b48d3bea0bb0b45a3be471405bd36a325bb7d1 Mon Sep 17 00:00:00 2001
+From 26a476ed04cfb5915756cc132c9e61d3d55b9c89 Mon Sep 17 00:00:00 2001
 From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
 Date: Fri, 9 Feb 2024 22:48:26 +0100
-Subject: [PATCH 3/5] fix: commit working version of u-boot to nand script
+Subject: [PATCH 3/6] fix: commit working version of u-boot to nand script
 
 ---
  f1c100_uboot_spinand.sh | 50 +++++++++++++++++++++++++++++++++++++++++

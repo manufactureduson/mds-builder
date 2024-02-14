@@ -1,7 +1,7 @@
-From 9094c94f98082928d8006ad541b5a830edc81d8a Mon Sep 17 00:00:00 2001
+From 151d9535400afbe78d2905019e36c8f1bdefc954 Mon Sep 17 00:00:00 2001
 From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
 Date: Fri, 9 Feb 2024 22:47:03 +0100
-Subject: [PATCH 2/5] fix: remove double semi colons
+Subject: [PATCH 2/6] fix: remove double semi colons
 
 ---
  arch/arm/mach-sunxi/board.c | 2 +-

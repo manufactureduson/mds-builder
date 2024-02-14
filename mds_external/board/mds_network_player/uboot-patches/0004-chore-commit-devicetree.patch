@@ -1,7 +1,7 @@
-From 9ec9635d09da32b69f6ae10e6ae788a8923256f0 Mon Sep 17 00:00:00 2001
+From 04ddaa0612a4cf66a243d46734bf8f87f6b65ccb Mon Sep 17 00:00:00 2001
 From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
 Date: Fri, 9 Feb 2024 22:48:51 +0100
-Subject: [PATCH 4/5] chore: commit devicetree
+Subject: [PATCH 4/6] chore: commit devicetree
 
 ---
  arch/arm/dts/u-boot_devicetree.dts | 79 ++++++++++++++++++++++++++++++
