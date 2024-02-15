@@ -1,7 +1,7 @@
-From 266668a9d2c86d6300ed4158ef40a865196c0732 Mon Sep 17 00:00:00 2001
+From c947a697bc207163f6f8fb73d812db9dff8a9a8c Mon Sep 17 00:00:00 2001
 From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
 Date: Sun, 28 Jan 2024 09:52:33 +0100
-Subject: [PATCH 3/5] add led and fix errors while loading i2s and spdif
+Subject: [PATCH 3/7] add led and fix errors while loading i2s and spdif
 
 ---
  .../arm/boot/dts/allwinner/suniv-f1c100s.dtsi |  6 +--
@@ -9,7 +9,7 @@ Subject: [PATCH 3/5] add led and fix errors while loading i2s and spdif
  2 files changed, 32 insertions(+), 21 deletions(-)
 
 diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
-index 664deccb579a..61bfdd337909 100644
+index 664deccb5..61bfdd337 100644
 --- a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
 +++ b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
 @@ -82,8 +82,8 @@ i2s0: i2s@1c22000 {
@@ -33,7 +33,7 @@ index 664deccb579a..61bfdd337909 100644
  			dmas = <&dma SUN4I_DMA_NORMAL 2>,
  			       <&dma SUN4I_DMA_NORMAL 2>;
 diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
-index 7127742934d7..5041deb3d743 100644
+index 712774293..5041deb3d 100644
 --- a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 +++ b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 @@ -22,16 +22,16 @@ chosen {

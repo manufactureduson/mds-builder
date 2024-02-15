@@ -1,14 +1,14 @@
-From 57b6aa83f62ef3de554ae91c8f96be2cf534c941 Mon Sep 17 00:00:00 2001
+From 64904baa44e3f7575f16c077e292ff9bbc89bc45 Mon Sep 17 00:00:00 2001
 From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
 Date: Mon, 29 Jan 2024 23:17:47 +0100
-Subject: [PATCH 5/5] Force peripheral mode
+Subject: [PATCH 5/7] Force peripheral mode
 
 ---
  .../dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
-index 566ee054e7fb..a5389faabb62 100644
+index 566ee054e..a5389faab 100644
 --- a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 +++ b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 @@ -120,12 +120,12 @@ &uart0 {

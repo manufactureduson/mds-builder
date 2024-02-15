@@ -1,0 +1,73 @@
+From ae661b4695407a601a7d4d9abf4acc5aaa716c43 Mon Sep 17 00:00:00 2001
+From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
+Date: Thu, 15 Feb 2024 08:47:37 +0000
+Subject: [PATCH 7/7] Support for i2s and spdif for suniv
+
+---
+ arch/arm/boot/dts/allwinner/Makefile                       | 7 ++-----
+ arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi             | 3 +--
+ .../allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts  | 4 ++++
+ 3 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm/boot/dts/allwinner/Makefile b/arch/arm/boot/dts/allwinner/Makefile
+index 2d26c3397..0dc869447 100644
+--- a/arch/arm/boot/dts/allwinner/Makefile
++++ b/arch/arm/boot/dts/allwinner/Makefile
+@@ -328,8 +328,5 @@ dtb-$(CONFIG_MACH_SUN9I) += \
+ dtb-$(CONFIG_MACH_SUNIV) += \
+ 	suniv-f1c100s-licheepi-nano.dtb \
+ 	suniv-f1c200s-lctech-pi.dtb \
+-	suniv-f1c200s-popstick-v1.1.dtb
+-dtb-$(CONFIG_MACH_SUNIV) += \
+-	suniv-f1c100s-licheepi-nano.dtb \
+-	suniv-f1c200s-lctech-pi.dtb \
+-	suniv-f1c200s-popstick-v1.1.dtb
++	suniv-f1c200s-popstick-v1.1.dtb \
++	suniv-f1c200s-mds-network-streamer-v1.0.dtb
+diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
+index 61bfdd337..dcd8407a0 100644
+--- a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
++++ b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
+@@ -232,9 +232,8 @@ i2c0_pd_pins: i2c0-pd-pins {
+ 				function = "i2c0";
+ 			};
+ 
+-			/omit-if-no-ref/
+ 			spdif_tx_pin: spdif-tx-pin {
+-				pins = "PD17", "PE6";
++				pins = "PD17";
+ 				function = "spdif";
+ 			};
+ 
+diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+index a5389faab..add9008b4 100644
+--- a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
++++ b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+@@ -41,6 +41,7 @@ reg_vcc3v3: regulator-3v3 {
+ 	};
+ 
+ 	es9023: pcm5102a {
++		#sound-dai-cells = <0>;
+ 		compatible = "ti,pcm5102a";
+ 	};
+ 
+@@ -56,6 +57,7 @@ sound-i2s {
+ 		simple-audio-card,mclk-fs = <512>;
+ 
+ 		simple-audio-card,cpu {
++			#sound-dai-cells = <0>;
+ 			sound-dai = <&i2s0>;
+ 		};
+ 
+@@ -131,6 +133,8 @@ &usbphy {
+ 
+ 
+ &spdif {
++	pinctrl-names = "default";
++	pinctrl-0 = <&spdif_tx_pin>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.39.2
+

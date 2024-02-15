@@ -1,14 +1,14 @@
-From 00ca088aa85cd41f9ebca1f34285128f69c41a50 Mon Sep 17 00:00:00 2001
+From 77492fdc644aa5efcee2deb1626347c8234c9c35 Mon Sep 17 00:00:00 2001
 From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
 Date: Sun, 28 Jan 2024 23:35:58 +0100
-Subject: [PATCH 4/5] Try to get otg working
+Subject: [PATCH 4/7] Try to get otg working
 
 ---
  .../dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
-index 5041deb3d743..566ee054e7fb 100644
+index 5041deb3d..566ee054e 100644
 --- a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 +++ b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 @@ -120,14 +120,16 @@ &uart0 {

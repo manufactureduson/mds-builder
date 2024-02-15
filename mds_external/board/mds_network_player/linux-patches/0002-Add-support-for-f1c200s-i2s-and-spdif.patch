@@ -1,7 +1,7 @@
-From 229a3ba826fae6326986857aaaf99aa67bdb239b Mon Sep 17 00:00:00 2001
+From 694b7e7c53444dc5c75159f4697ee732c4cdf88e Mon Sep 17 00:00:00 2001
 From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
 Date: Wed, 24 Jan 2024 09:41:58 +0100
-Subject: [PATCH 2/5] Add support for f1c200s i2s and spdif
+Subject: [PATCH 2/7] Add support for f1c200s i2s and spdif
 
 ---
  .../arm/boot/dts/allwinner/suniv-f1c100s.dtsi |  15 ++-
@@ -10,7 +10,7 @@ Subject: [PATCH 2/5] Add support for f1c200s i2s and spdif
  create mode 100644 arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 
 diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
-index 7df350a9cb72..664deccb579a 100644
+index 7df350a9c..664deccb5 100644
 --- a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
 +++ b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
 @@ -3,8 +3,8 @@
@@ -45,7 +45,7 @@ index 7df350a9cb72..664deccb579a 100644
  			#sound-dai-cells = <0>;
 diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 new file mode 100644
-index 000000000000..7127742934d7
+index 000000000..712774293
 --- /dev/null
 +++ b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
 @@ -0,0 +1,126 @@

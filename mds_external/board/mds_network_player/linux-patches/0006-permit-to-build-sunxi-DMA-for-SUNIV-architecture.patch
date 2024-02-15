@@ -1,0 +1,27 @@
+From d7b76b0285bde73adf286156fbc8803e484eab2a Mon Sep 17 00:00:00 2001
+From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
+Date: Thu, 15 Feb 2024 08:46:44 +0000
+Subject: [PATCH 6/7] permit to build sunxi DMA for SUNIV architecture
+
+---
+ drivers/dma/Kconfig | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/dma/Kconfig b/drivers/dma/Kconfig
+index 70ba506da..e5e8cf772 100644
+--- a/drivers/dma/Kconfig
++++ b/drivers/dma/Kconfig
+@@ -162,8 +162,8 @@ config DMA_SA11X0
+ 
+ config DMA_SUN4I
+ 	tristate "Allwinner A10 DMA SoCs support"
+-	depends on MACH_SUN4I || MACH_SUN5I || MACH_SUN7I
+-	default (MACH_SUN4I || MACH_SUN5I || MACH_SUN7I)
++	depends on MACH_SUN4I || MACH_SUN5I || MACH_SUN7I || MACH_SUNIV
++	default (MACH_SUN4I || MACH_SUN5I || MACH_SUN7I || MACH_SUNIV)
+ 	select DMA_ENGINE
+ 	select DMA_VIRTUAL_CHANNELS
+ 	help
+-- 
+2.39.2
+
