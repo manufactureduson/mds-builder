@@ -2,29 +2,32 @@
 #
 # Load modules
 #
+# Read the content of file /etc/modules and print each line
+
+set -x
 
 case "$1" in
-  start)
-	printf "Load modules : "
-	while IFS= read -r module; do
-    	modprobe "$module"
-	done < /etc/modules
-	[ $? = 0 ] && echo "OK" || echo "FAIL"
-	;;
-  stop)
-	printf "Unload modules : "
-	while IFS= read -r module; do
-    	modprobe -r "$module"
-	done < /etc/modules
-	[ $? = 0 ] && echo "OK" || echo "FAIL"
-	;;
-  restart|reload)
-	"$0" stop
-	"$0" start
-	;;
-  *)
-	echo "Usage: $0 {start|stop|restart}"
-	exit 1
+        start)
+                printf "Load modules : "
+                while read -r module; do
+                        modprobe "$module"
+                done < /etc/modules
+                [ $? = 0 ] && echo "OK" || echo "FAIL"
+                ;;
+        stop)
+                printf "Unload modules : "
+                while read -r module; do
+                        modprobe -r "$module"
+                done < /etc/modules
+                [ $? = 0 ] && echo "OK" || echo "FAIL"
+                ;;
+        restart|reload)
+                "$0" stop
+                "$0" start
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|restart}"
+                exit 1
 esac
 
 exit $?
