@@ -237,9 +237,10 @@ Reasl is 0x1F000 = 126976
 Try to change buildroot size with this value and **OK**
 
 ### ubiupdatebol
-
+```
 ubiattach -p /dev/mtd1
-
+ubiupdatevol /dev/ubi0_0 /tmp/rootfs.ubifs
+```
 
 ### FASTMAP
 enable FASTMAP in u-boot :
