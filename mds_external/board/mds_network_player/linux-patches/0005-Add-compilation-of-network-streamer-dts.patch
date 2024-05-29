@@ -1,0 +1,348 @@
+From b20c25d2b644b68edcd0ca5d3880f59b47b2bf20 Mon Sep 17 00:00:00 2001
+From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
+Date: Tue, 28 May 2024 21:33:52 +0000
+Subject: [PATCH 5/8] Add compilation of network streamer dts
+
+---
+ arch/arm/boot/dts/allwinner/Makefile          |   3 +-
+ ...univ-f1c200s-mds-network-streamer-v1.0.dts | 317 ++++++++++++++++++
+ 2 files changed, 319 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+
+diff --git a/arch/arm/boot/dts/allwinner/Makefile b/arch/arm/boot/dts/allwinner/Makefile
+index 2d26c3397..430694d4f 100644
+--- a/arch/arm/boot/dts/allwinner/Makefile
++++ b/arch/arm/boot/dts/allwinner/Makefile
+@@ -332,4 +332,5 @@ dtb-$(CONFIG_MACH_SUNIV) += \
+ dtb-$(CONFIG_MACH_SUNIV) += \
+ 	suniv-f1c100s-licheepi-nano.dtb \
+ 	suniv-f1c200s-lctech-pi.dtb \
+-	suniv-f1c200s-popstick-v1.1.dtb
++	suniv-f1c200s-popstick-v1.1.dtb \
++	suniv-f1c200s-mds-network-streamer-v1.0.dtb
+diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+new file mode 100644
+index 000000000..f244a3d22
+--- /dev/null
++++ b/arch/arm/boot/dts/allwinner/suniv-f1c200s-mds-network-streamer-v1.0.dts
+@@ -0,0 +1,317 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2022 Icenowy Zheng <uwu@icenowy.me>
++ */
++
++/dts-v1/;
++#include "suniv-f1c100s.dtsi"
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/leds/common.h>
++
++/ {
++	model = "MDS Network Streamer v1.0";
++	compatible = "mds,network-streamer-v1.0",
++		     "allwinner,suniv-f1c200s";
++
++	aliases {
++		serial0 = &uart0;
++		i2c0 = &i2c0;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		led {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pio 3 7 GPIO_ACTIVE_HIGH>; /* PD7 */
++			linux,default-trigger = "heartbeat";
++		};
++	};
++
++	reg_vcc3v3: regulator-3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
++
++	audio_mclk: audio-clock {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <25000000>;
++	};
++
++	spi1_gpio: spi1-gpio {
++		compatible = "spi-gpio";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		sck-gpios = <&pio 3 20 GPIO_ACTIVE_HIGH>;  /* PD20 */
++		mosi-gpios = <&pio 3 19 GPIO_ACTIVE_HIGH>; /* PD19 */
++		miso-gpios = <&pio 3 21 GPIO_ACTIVE_HIGH>; /* PD21 */
++		num-chipselects = <1>;
++		cs-gpios = <&pio 3 18 GPIO_ACTIVE_HIGH>;  /* PD18 */
++
++	};
++
++	// es9023: pcm5102a {
++	// 	#sound-dai-cells = <0>;
++	// 	compatible = "ti,pcm5102a";
++	// };
++
++	spdif_out: spdif-out {
++		#sound-dai-cells = <0>;
++		compatible = "linux,spdif-dit";
++	};
++
++	// sound-i2s {
++	// 	compatible = "simple-audio-card";
++	// 	simple-audio-card,name = "es9023";
++	// 	simple-audio-card,format = "i2s";
++	// 	simple-audio-card,mclk-fs = <256>;
++	// 	simple-audio-card,cpu {
++	// 		#sound-dai-cells = <0>;
++	// 		sound-dai = <&i2s0>;
++	// 	};
++
++	// 	simple-audio-card,codec {
++	// 		sound-dai = <&es9023>;
++	// 	};
++	// };
++	// sound-i2s {
++	// 	compatible = "simple-audio-card";
++    //             simple-audio-card,format = "i2s";
++    //             simple-audio-card,name = "seeed-2mic-voicecard"; 
++    //             status = "okay";
++    //             simple-audio-card,widgets =
++    //                     "Microphone", "Mic Jack",
++    //                     "Line", "Line In",
++    //                     "Line", "Line Out",
++    //                     "Speaker", "Speaker",
++    //                     "Headphone", "Headphone Jack";
++    //             simple-audio-card,routing =
++    //                     "Headphone Jack", "HP_L",
++    //                     "Headphone Jack", "HP_R",
++    //                     "Speaker", "SPK_LP",
++    //                     "Speaker", "SPK_LN",
++    //                     "LINPUT1", "Mic Jack",
++    //                     "LINPUT3", "Mic Jack",
++    //                     "RINPUT1", "Mic Jack",
++    //                     "RINPUT2", "Mic Jack";
++
++
++
++
++    //             simple-audio-card,cpu {
++    //                 sound-dai = <&i2s0>;
++    //             };
++    //             dailink0_slave: simple-audio-card,codec {
++    //                 sound-dai = <&wm8960>;
++	// 				clocks = <&audio_mclk>;
++	// 				clock-names = "mclk";
++
++    //             };
++	// };
++	sound-spdif {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "On-board SPDIF";
++
++		simple-audio-card,cpu {
++			sound-dai = <&spdif>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&spdif_out>;
++		};
++	};
++};
++
++
++
++&otg_sram {
++	status = "okay";
++};
++
++&spi0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&spi0_pc_pins>;
++	status = "okay";
++	flash@0 {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		compatible = "winbond,w25q128", "spi-nand";
++		reg = <0>;
++		spi-max-frequency = <40000000>;
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			partition@0 {
++				label = "boot";
++				reg = <0 0x100000>;
++			};
++
++			partition@100000 {
++				label = "rootfs";
++				reg = <0x100000 0x7F00000>;
++			};
++		};
++	};
++};
++
++&spi1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&spi1_pe_pins>;
++	status = "okay";
++	display@0 {
++		compatible = "waveshare,gc9a01";
++		reg = <0>;
++		reset-gpios = <&pio 3 5 GPIO_ACTIVE_HIGH>; //GPIO16 PIN36 PD5
++		dc-gpios = <&pio 3 6 GPIO_ACTIVE_HIGH>; //GIO17 11 PD6
++		//backlight = <&backlight>;
++		spi-max-frequency = <1000000>;
++		write-only;
++		/* Set hb-porch to compensate for non-visible area */
++		panel-timing {
++			hactive = <240>;
++			vactive = <240>;
++			hback-porch = <0>;
++			vback-porch = <0>;
++
++			clock-frequency = <0>;
++			hfront-porch = <0>;
++			hsync-len = <0>;
++			vfront-porch = <0>;
++			vsync-len = <0>;
++		};
++	};
++
++
++	// gc9a01: gc9a01@0 {
++	// 	compatible = "ilitek,ili9340";
++	// 	reg = <0>;
++	// 	pinctrl-names = "default";
++	// 	reset-gpios = <&pio 3 5 GPIO_ACTIVE_HIGH>; //GPIO16 PIN36 PD5
++	// 	dc-gpios = <&pio 3 6 GPIO_ACTIVE_HIGH>; //GIO17 11 PD6
++	// 	// led-gpios = <&gpio 18 0>;	
++	// 	spi-max-frequency = <1000000>;
++	// 	buswidth = <8>;
++	// 	width = <240>;
++	// 	height = <240>;
++	// 	rotate = <0>;
++	// 	fps = <50>;
++	// 	bgr;
++	// 	debug = <1>;
++	// 	init = <
++	// 		0x01000011 /* Sleep mode OFF */
++	// 		0x02000078 /* Delay 120ms */
++	// 		0x010000EF /* Inter register enable 2 */
++	// 		0x010000EB 0x14
++	// 		/* BEGIN set inter_command HIGH */
++	// 		0x010000FE /* Inter register enable 1 */
++	// 		0x010000EF /* Inter register enable 2 */
++	// 		/* END set inter_command HIGH */
++	// 		0x010000EB 0x14
++	// 		0x01000084 0x40
++	// 		0x01000085 0xFF
++	// 		0x01000086 0xFF
++	// 		0x01000087 0xFF
++	// 		0x01000088 0x0A
++	// 		0x01000089 0x21
++	// 		0x0100008A 0x00
++	// 		0x0100008B 0x80
++	// 		0x0100008C 0x01
++	// 		0x0100008D 0x01
++	// 		0x0100008E 0xFF
++	// 		0x0100008F 0xFF
++	// 		0x010000B6 0x00 0x00 /* Display function control */
++	// 		0x01000036 0x08 /* Memory access control */
++	// 		0x0100003A 0x05 /* Pixel format */
++	// 		0x01000090 0x08 0x08 0x08 0x08
++	// 		0x010000BD 0x06
++	// 		0x010000BC 0x00
++	// 		0x010000FF 0x60 0x01 0x04
++	// 		0x010000C3 0x13 /* Voltage regulator 1a */
++	// 		0x010000C4 0x13 /* Voltage regulator 1b */
++	// 		0x010000C9 0x22 /* Voltage regulator 2a */
++	// 		0x010000BE 0x11
++	// 		0x010000E1 0x10 0x0E
++	// 		0x010000DF 0x21 0x0c 0x02
++	// 		0x010000F0 0x45 0x09 0x08 0x08 0x26 0x2A /* Set gamma1 */
++	// 		0x010000F1 0x43 0x70 0x72 0x36 0x37 0x6F /* Set gamma2 */
++	// 		0x010000F2 0x45 0x09 0x08 0x08 0x26 0x2A /* Set gamma3 */
++	// 		0x010000F3 0x43 0x70 0x72 0x36 0x37 0x6F /* Set gamma4 */
++	// 		0x010000ED 0x1B 0x0B
++	// 		0x010000AE 0x77
++	// 		0x010000CD 0x63
++	// 		0x01000070 0x07 0x07 0x04 0x0E 0x0F 0x09 0x07 0x08 0x03
++	// 		0x010000E8 0x34 /* Frame rate */
++	// 		0x01000062 0x18 0x0D 0x71 0xED 0x70 0x70 0x18 0x0F 0x71 0xEF 0x70 0x70
++	// 		0x01000063 0x18 0x11 0x71 0xF1 0x70 0x70 0x18 0x13 0x71 0xF3 0x70 0x70
++	// 		0x01000064 0x28 0x29 0xF1 0x01 0xF1 0x00 0x07
++	// 		0x01000066 0x3C 0x00 0xCD 0x67 0x45 0x45 0x10 0x00 0x00 0x00
++	// 		0x01000067 0x00 0x3C 0x00 0x00 0x00 0x01 0x54 0x10 0x32 0x98
++	// 		0x01000074 0x10 0x85 0x80 0x00 0x00 0x4E 0x00
++	// 		0x01000098 0x3e 0x07
++	// 		0x01000035 /* Tearing effect ON */
++	// 		0x01000021 /* Display inversion ON */
++	// 		0x01000011 /* Sleep mode OFF */
++	// 		0x0200000C /* Delay 12ms */
++	// 		0x01000029 /* Display ON */
++	// 		0x02000014 /* Delay 20ms */
++	// 	>;
++    // };
++};
++
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_pe_pins>;
++	status = "okay";
++};
++
++&usb_otg {
++	dr_mode = "peripheral";
++	status = "okay";
++};
++
++&usbphy {
++	//usb0_id_det-gpios = <&pio 5 0 GPIO_ACTIVE_HIGH>; /* PF0 */
++	status = "okay";
++};
++
++
++&spdif {
++	pinctrl-names = "default";
++	pinctrl-0 = <&spdif_tx_pe_pin>;
++	status = "okay";
++};
++
++&i2s0 {
++	status = "disabled";
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2s_pe_pins>;
++	status = "disabled";
++};
++
++&i2c0 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c0_pd_pins>;
++	
++	// wm8960: wm8960@1a {
++	// 	#sound-dai-cells = <0>;
++	// 	compatible = "wlf,wm8960";
++	// 	reg = <0x1a>;	
++	// 	// clocks = <&audio_mclk>;
++	// 	// clock-names = "mclk";	    
++	// 	// wlf,shared-lrclk;
++	// };
++
++};
+-- 
+2.39.2
+

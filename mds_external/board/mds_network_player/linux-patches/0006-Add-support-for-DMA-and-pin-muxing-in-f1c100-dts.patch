@@ -1,0 +1,101 @@
+From c22791fde730a8ba42d8d02afbe005a3fb59e523 Mon Sep 17 00:00:00 2001
+From: Nicolas Aguirre <aguirre.nicolas@gmail.com>
+Date: Tue, 28 May 2024 21:35:42 +0000
+Subject: [PATCH 6/8] Add support for DMA and pin muxing in f1c100 dts
+
+---
+ .../arm/boot/dts/allwinner/suniv-f1c100s.dtsi | 59 +++++++++++++++++++
+ 1 file changed, 59 insertions(+)
+
+diff --git a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
+index 3c61d59ab..7a7170aff 100644
+--- a/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
++++ b/arch/arm/boot/dts/allwinner/suniv-f1c100s.dtsi
+@@ -5,6 +5,7 @@
+  */
+ 
+ #include <dt-bindings/clock/suniv-ccu-f1c100s.h>
++#include <dt-bindings/dma/sun4i-a10.h>
+ #include <dt-bindings/reset/suniv-ccu-f1c100s.h>
+ 
+ / {
+@@ -69,6 +70,42 @@ otg_sram: sram-section@0 {
+ 			};
+ 		};
+ 
++		dma: dma-controller@1c02000 {
++			compatible = "allwinner,suniv-f1c100s-dma";
++			reg = <0x01c02000 0x1000>;
++			interrupts = <18>;
++			clocks = <&ccu CLK_BUS_DMA>;
++			resets = <&ccu RST_BUS_DMA>;
++			#dma-cells = <2>;
++		};
++
++		i2s0: i2s@1c22000 {
++			#sound-dai-cells = <0>;
++			compatible = "allwinner,sun6i-a31-i2s";
++			reg = <0x01c22000 0x400>;
++			interrupts = <35>;
++			clocks = <&ccu CLK_BUS_I2S0>, <&ccu CLK_I2S>;
++			clock-names = "apb", "mod";
++			resets = <&ccu RST_BUS_I2S0>;
++			dmas = <&dma SUN4I_DMA_NORMAL 0xe>,
++			       <&dma SUN4I_DMA_NORMAL 0xe>;
++			dma-names = "rx", "tx";
++			status = "disabled";
++		};
++
++		spdif: spdif@1c21400 {
++			#sound-dai-cells = <0>;
++			compatible = "allwinner,suniv-f1c100s-spdif";
++			reg = <0x01c21400 0x400>;
++			interrupts = <5>;
++			clocks = <&ccu CLK_BUS_SPDIF>, <&ccu CLK_SPDIF>;
++			clock-names = "apb", "mod";
++			resets = <&ccu RST_BUS_SPDIF>;
++			dmas = <&dma SUN4I_DMA_NORMAL 1>;
++			dma-names = "tx", "rx";
++			status = "disabled";
++		};
++
+ 		spi0: spi@1c05000 {
+ 			compatible = "allwinner,suniv-f1c100s-spi",
+ 				     "allwinner,sun8i-h3-spi";
+@@ -198,11 +235,33 @@ i2c0_pd_pins: i2c0-pd-pins {
+ 				function = "i2c0";
+ 			};
+ 
++			spdif_tx_pd_pin: spdif-tx-pd-pin {
++				pins = "PD17";
++				function = "spdif";
++			};
++
++			spdif_tx_pe_pin: spdif-tx-pe-pin {
++				pins = "PE6";
++				function = "spdif";
++			};
++
++
++			i2s_pe_pins: i2s-pe-pins {
++				pins = "PE3", "PE4", "PE5", "PE6", "PE12";
++				function = "i2s";
++			};
++
+ 			spi0_pc_pins: spi0-pc-pins {
+ 				pins = "PC0", "PC1", "PC2", "PC3";
+ 				function = "spi0";
+ 			};
+ 
++			spi1_pe_pins: spi1-pe-pins {
++				pins = "PE7", "PE8", "PE9", "PE10";
++				function = "spi1";
++			};
++
++
+ 			uart0_pe_pins: uart0-pe-pins {
+ 				pins = "PE0", "PE1";
+ 				function = "uart0";
+-- 
+2.39.2
+
