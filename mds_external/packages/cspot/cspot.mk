@@ -4,12 +4,13 @@
 # cspot
 #
 ################################################################################
-CSPOT_VERSION = 541fed52b792975e721b30bcaa220fb957b7bc76
+CSPOT_VERSION = 92492bbcfc011cf1f780b51617d9d06f564c0258
 CSPOT_SITE = https://github.com/feelfreelinux/cspot.git
 CSPOT_SUBDIR = targets/cli
 CSPOT_GIT_SUBMODULES = YES
 CSPOT_SITE_METHOD = git
-CSPOT_DEPENDENCIES = mbedtls
+CSPOT_DEPENDENCIES = mbedtls avahi host-protobuf host-python3 host-python-protobuf
+
 CSPOT_CONF_OPTS = -DUSE_ALSA=ON
 
 # When we're on ARM, but we don't have ARM instructions (only
