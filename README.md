@@ -10,9 +10,13 @@
 
 2. setup compiling environment by `. ./export.sh` in esp-idf directory
 
-3. In the `network_adapter` directory of this project, input command `idf.py set-target <chip_name>` to set target.
+3. In the `network_adapter` directory of this project, input command `idf.py set-target esp32-c3` to set target.
 
 4. Use `idf.py build` to recompile `network_adapter` and generate new firmware.
+
+ESP32-c3 flash
+
+![alt text](image.png)
 
 ## Checks
 
@@ -312,3 +316,56 @@ with screen SPI + app lvgl : Internet radio + spotify
 
 - Airplay 2
 - Spotify Connect
+
+TODO : 
+
+Update rootfs-a / rootfs-b
+Save u-boot environment in NAND
+
+## Respeaker 2
+
+https://wiki.seeedstudio.com/ReSpeaker_2_Mics_Pi_HAT/
+### button
+
+BUTTON: a User Button, connected to GPIO17 -> PD6 on f1c200s => GPIO 102 (4(D) * 32 - 1 ) + 6 = 102
+
+```
+gpio-event-mon -n gpiochip0 -o 102 -r -f -b 10000
+```
+
+
+# DMA : 
+Not supported fdor f1c200s. similiar to a10 DMA but needs patches.
+Found patches here : https://linux-sunxi.narkive.com/3zRXUcrE/rfc-patch-00-10-add-support-for-dma-and-audio-codec-of-f1c100s#post13
+
+For audio i2s : support for f1c200s is not available in mainline kernel. but there is some code coming from allwinner :
+Based on this page, suniv f1200s is sun3iw1.
+There is a https://github.com/SoCXin/H6/blob/dde0a40608fd962a419b2a543a36166cfeb01d04/linux/kernel/sound/soc/sunxi/sun3iw1_daudio.c#L828 driver
+That might be close to the sun50iw1p1 one which is A64/H64 architecture. 
+Driver for A64 is mainline : 
+
+
+
+## I2S
+
+
+## dev kernel :
+
+build :
+```shell
+make build-linux-rebuild 
+```
+
+copy to target :
+```shell
+scp -O /workspace/build/output/network_player/images/uImage root@192.168.2.2:/boot
+```
+
+copy module : 
+```shell
+scp -O /workspace/build/output/network_player/target/lib/modules/6.7.2/kernel/sound/soc/sunxi/sun4i-spdif.ko root@192.168.2.2://usr/lib/modules/6.7.2/kernel/sound/soc/sunxi/sun4i-spdif.ko
+```
+
+## NanoHat-SPDIF
+EXT SPDIF :
+https://github.com/Irdroid/NanoHat-SPDIF/blob/main/Hardware/Eagle%20Design/NanoHat-SPDIF.pdf
