@@ -24,7 +24,7 @@ DOCKER_COMMAND := docker run -it --rm \
 		--workdir="$(CURDIR)" \
 		$(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
 
-BUILDROOT_VERSION ?= 2023.11
+BUILDROOT_VERSION ?= 2024.02.2
 
 MACHINE ?= network_player
 
@@ -106,9 +106,9 @@ distrib-clean: ## Remove the distribution directory
 ### DOWNLOADS Buildroot ###
 
 br-downloads: ## Download buildroot source code
-	@echo ">>> Download buildroot source code"
-	## $(PREFIX) mkdir -p build
-	## $(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xvz -C build/
+	#@echo ">>> Download buildroot source code"
+	#$(PREFIX) mkdir -p build
+	#$(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xvz -C build/
 	
 .PHONY: br-downloads
 
