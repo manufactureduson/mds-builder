@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Start/Stop MDS
+#
+set -e
+
+case "$1" in
+        start)
+                printf "Starting MDS : "
+                [ $? = 0 ] && echo "OK" || echo "FAIL"
+                ;;
+        stop)
+                printf "Stopping MDS : "
+                [ $? = 0 ] && echo "OK" || echo "FAIL"
+                ;;
+        restart|reload)
+                "$0" stop
+                "$0" start
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|restart}"
+                exit 1
+esac
+
+exit $?
