@@ -8,7 +8,7 @@
 
 1. run `cmake .` to setup enviornment, it will setup esp-idf as submodule to be used by `network_adapter`
 
-2. setup compiling environment by `. ./export.sh` in esp-idf directory
+2. setup compiling environment by `cd esp-idf && . ./export.sh` in esp-idf directory
 
 3. In the `network_adapter` directory of this project, input command `idf.py set-target esp32-c3` to set target.
 
@@ -1022,3 +1022,331 @@ Enable fastmap again + disable all printk in the kernel + SPI speed 100Mhz
 Bootloader : 5.61
 Kernel : 9.458110 - 5.619892 = 3.838218s
 Total : 11.186379s
+
+# ESP32C3 / ESP hosted NG notes
+
+Hello. I'm trying to setup ESP Hosted NG.
+My hardware is a custom board I developped based on a ESP32-C3-Mini and allwinner f1c200s.
+I built the latest version of esp-hosted-ng (`b1422af`) firmware and the linux kernel version on the F1c200s is `6.9.2`. 
+I followed the porting guide, and start first by validating the SPI communication betweem ESP32-C3 and F1c200s with spidev.
+So far so good, I was able to validate the communication at 30Mhz between the two devices.
+
+I notived that when the SPI slave use MODE2, the data received on f1c200s are invalid, Whem I'm using MODE0 or MODE1 data are correct. On the F1c200s side, I'm always using MODE2git .
+
+I did't notive any issue with the communication. I'm able to read and write data from the ESP32-C3 to the F1c200s and vice versa.
+I used the [ESP32 SPI slave example](https://github.com/espressif/esp-idf/tree/master/examples/peripherals/spi_slave/receiver) and developped a small app for the F1c200s, here.
+
+I'm now flashed the ESP Hosted NG firmware, and build `esp32_spi`. 
+
+
+Reset GPIO is fine, and I can see the ESP32 resetting when the line is asserted even if I had to raise the pin to 1 and increase the reset tine a bit instead or just getting it back to input.
+
+```diff
+diff --git a/esp_hosted_ng/host/main.c b/esp_hosted_ng/host/main.c
+index 258d2bd..30cf84b 100644
+--- a/esp_hosted_ng/host/main.c
++++ b/esp_hosted_ng/host/main.c
+@@ -961,7 +961,9 @@ static void esp_reset(void)
+ 
+                        /* HOST's resetpin set to LOW */
+                        gpio_set_value(resetpin, 0);
+-                       udelay(200);
++                       mdelay(200);
++                       gpio_set_value(resetpin, 1);
++
+ 
+                        /* HOST's resetpin set to INPUT */
+                        gpio_direction_input(resetpin);
+```
+
+Handhsake and data ready pins looks also good, and I can see the interrupts being triggered on the F1c200s side.
+
+I end by using SPI mode 1 on the ESP32 side and mode 2 on the F1c200s as it looks I got the best results with this configuration.
+
+The main problem is that the command `iw espsta0 scan` is not working. I'm getting the following error. It hangs and I never got the result.
+
+The logs from ESP32 : 
+```
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x1 (POWERON),boot:0xa (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x170c
+load:0x403cc710,len:0x968
+load:0x403ce710,len:0x2f9c
+entry 0x403cc710
+I (30) boot: ESP-IDF v5.1.3-dirty 2nd stage bootloader
+I (30) boot: compile time Jun 22 2024 15:20:15
+I (30) boot: chip revision: v0.4
+I (34) boot.esp32c3: SPI Speed      : 80MHz
+I (39) boot.esp32c3: SPI Mode       : DIO
+I (43) boot.esp32c3: SPI Flash Size : 4MB
+I (48) boot: Enabling RNG early entropy source...
+I (53) boot: Partition Table:
+I (57) boot: ## Label            Usage          Type ST Offset   Length
+I (64) boot:  0 nvs              WiFi data        01 02 00009000 00004000
+I (72) boot:  1 otadata          OTA data         01 00 0000d000 00002000
+I (79) boot:  2 phy_init         RF data          01 01 0000f000 00001000
+I (87) boot:  3 factory          factory app      00 00 00010000 00100000
+I (94) boot:  4 ota_0            OTA app          00 10 00110000 00100000
+I (102) boot:  5 ota_1            OTA app          00 11 00210000 00100000
+I (109) boot: End of partition table
+I (113) boot: Defaulting to factory image
+I (118) esp_image: segment 0: paddr=00010020 vaddr=3c090020 size=1faf8h (129784) map
+I (148) esp_image: segment 1: paddr=0002fb20 vaddr=3fc94600 size=004f8h (  1272) load
+I (148) esp_image: segment 2: paddr=00030020 vaddr=42000020 size=8be94h (573076) map
+I (246) esp_image: segment 3: paddr=000bbebc vaddr=3fc94af8 size=02de4h ( 11748) load
+I (249) esp_image: segment 4: paddr=000beca8 vaddr=40380000 size=145d8h ( 83416) load
+I (274) boot: Loaded app from partition at offset 0x10000
+I (275) boot: Disabling RNG early entropy source...
+I (286) cpu_start: Unicore app
+I (286) cpu_start: Pro cpu up.
+I (295) cpu_start: Pro cpu start user code
+I (295) cpu_start: cpu freq: 160000000 Hz
+I (295) cpu_start: Application information:
+I (298) cpu_start: Project name:     network_adapter
+I (304) cpu_start: App version:      release/ng-v1.0.2-262-gb1422af-
+I (311) cpu_start: Compile time:     Jun 22 2024 15:20:09
+I (317) cpu_start: ELF file SHA256:  6dfd7facb45702bb...
+I (323) cpu_start: ESP-IDF:          v5.1.3-dirty
+I (328) cpu_start: Min chip rev:     v0.3
+I (333) cpu_start: Max chip rev:     v1.99
+I (338) cpu_start: Chip rev:         v0.4
+I (342) heap_init: Initializing. RAM available for dynamic allocation:
+I (350) heap_init: At 3FC9B950 len 000246B0 (145 KiB): DRAM
+I (356) heap_init: At 3FCC0000 len 0001C710 (113 KiB): DRAM/RETENTION
+I (363) heap_init: At 3FCDC710 len 00002950 (10 KiB): DRAM/RETENTION/STACK
+I (370) heap_init: At 50000010 len 00001FD8 (7 KiB): RTCRAM
+I (378) spi_flash: detected chip: generic
+I (381) spi_flash: flash io: dio
+I (386) sleep: Configure to isolate all GPIO pins in sleep state
+I (392) sleep: Enable automatic switching of GPIO sleep configuration
+I (399) coexist: coex firmware version: 77cd7f8
+I (405) coexist: coexist rom version 9387209
+I (410) app_start: Starting scheduler on CPU0
+I (414) main_task: Started on CPU0
+I (418) main_task: Calling app_main()
+I (422) stats: *********************************************************************
+I (430) stats:                 ESP-Hosted Firmware version :: 1.0.3
+I (439) stats:                 Transport used :: SPI only
+I (447) stats: *********************************************************************
+I (456) FW_MAIN: Supported features are:
+I (460) FW_MAIN: - WLAN over SPI
+I (464) FW_BT: - BT/BLE
+I (467) FW_BT:    - HCI Over SPI
+I (471) FW_BT:    - BLE only
+I (475) FW_MAIN: Capabilities: 0xe8
+pp rom version: 9387209
+net80211 rom version: 9387209
+I (485) wifi:wifi driver task: 3fca1df0, prio:23, stack:6656, core=0
+I (491) wifi:wifi firmware version: e3cf69a
+I (494) wifi:wifi certification version: v7.0
+I (498) wifi:config NVS flash: disabled
+I (502) wifi:config nano formating: disabled
+I (506) wifi:Init data frame dynamic rx buffer num: 40
+I (511) wifi:Init static rx mgmt buffer num: 5
+I (515) wifi:Init management short buffer num: 32
+I (519) wifi:Init dynamic tx buffer num: 40
+I (523) wifi:Init static tx FG buffer num: 2
+I (527) wifi:Init static rx buffer size: 1600
+I (531) wifi:Init static rx buffer num: 20
+I (535) wifi:Init dynamic rx buffer num: 40
+I (539) wifi_init: rx ba win: 32
+I (543) wifi_init: tcpip mbox: 32
+I (547) wifi_init: udp mbox: 6
+I (550) wifi_init: tcp mbox: 6
+I (554) wifi_init: tcp tx win: 5760
+I (558) wifi_init: tcp rx win: 5760
+I (562) wifi_init: tcp mss: 1440
+I (566) wifi_init: WiFi IRAM OP enabled
+I (571) wifi_init: WiFi RX IRAM OP enabled
+I (576) BLE_INIT: BT controller compile version [9359a4d]
+I (582) BLE_INIT: Bluetooth MAC: f0:f5:bd:f6:80:ca
+
+I (588) phy_init: phy_version 1150,7c3c08f,Jan 24 2024,17:32:21
+I (626) FW_MAIN: ESP Bluetooth MAC addr: f0-f5-bd-f6-80-ca
+
+I (627) FW_SPI: Using SPI interface
+I (627) gpio: GPIO[3]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0
+I (635) gpio: GPIO[4]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0
+SPI Slave mode : 1
+I (1647) FW_MAIN: Initial set up done
+I (1647) main_task: Returned from app_main()
+I (1669) FW_SPI: 0x3fcb8860   03 00 00 00 1a 00 0c 00  52 01 00 00 01 00 13 00  |........R.......|
+I (1669) FW_SPI: 0x3fcb8870   12 00 00 00 03 01 05 02  01 01 00 01 e8 01 07 01  |................|
+I (1760) FW_SPI: 0x3fc9d8dc   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1760) FW_SPI: 0x3fc9d8ec   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1769) SDIO Rx: 0x3fc9df2c   01 00 00 00 00 00 00 00                           |........|
+I (1777) Rx Cmd: 0x3fc9df2c   01 00 00 00 00 00 00 00                           |........|
+I (1786) FW_MAIN: INIT Interface command
+
+I (1792) wifi:mode : sta (f0:f5:bd:f6:80:c8)
+I (1795) wifi:enable tsf
+I (1797) FW_CMD: Wifi Sta mode set
+
+I (1816) FW_SPI: 0x3fcb8860   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1816) FW_SPI: 0x3fcb8870   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1833) FW_SPI: 0x3fc9e96c   00 00 02 00 08 00 0c 00  19 00 00 00 01 02 00 00  |................|
+I (1834) FW_SPI: 0x3fc9e97c   00 00 00 00 64 e9 c9 3f  54 00 00 00 88 e9 c9 3f  |....d..?T......?|
+I (1850) FW_SPI: 0x3fcb8860   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1853) FW_SPI: 0x3fcb8870   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1864) SDIO Rx: 0x3fcb8eb0   03 00 00 00 00 00 00 00                           |........|
+I (1872) Rx Cmd: 0x3fcb8eb0   03 00 00 00 00 00 00 00                           |........|
+I (1881) FW_MAIN: Get MAC command
+
+I (1885) FW_CMD: 0x3fcb74e0   f0 f5 bd f6 80 c8                                 |......|
+I (1912) FW_SPI: 0x3fcb9fec   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1913) FW_SPI: 0x3fcb9ffc   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1930) FW_SPI: 0x3fc9df34   00 00 02 00 10 00 0c 00  09 05 00 00 03 02 06 00  |................|
+I (1931) FW_SPI: 0x3fc9df44   00 00 00 00 f0 f5 bd f6  80 c8 00 00 54 00 00 00  |............T...|
+I (1955) FW_SPI: 0x3fcb8ea4   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1955) FW_SPI: 0x3fcb8eb4   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1964) SDIO Rx: 0x3fcb9ff8   0f 00 00 00 00 00 00 00  00 00 00 00              |............|
+I (1973) Rx Cmd: 0x3fcb9ff8   0f 00 00 00 00 00 00 00  00 00 00 00              |............|
+I (1982) FW_MAIN: Tx power command
+
+I (1986) MAC Filter: 0x3fc9843c   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (1996) MAC Filter: 0x3fc9844c   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2006) MAC Filter: 0x3fc9845c   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2016) MAC Filter: 0x3fc9846c   00                                                |.|
+I (2043) FW_SPI: 0x3fcb8860   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2044) FW_SPI: 0x3fcb8870   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2061) FW_SPI: 0x3fc9df38   00 00 02 00 0c 00 0c 00  7b 00 00 00 0f 02 00 00  |........{.......|
+I (2062) FW_SPI: 0x3fc9df48   00 00 00 00 50 00 00 00  54 00 00 00 54 df c9 3f  |....P...T...T..?|
+I (2339) FW_SPI: 0x3fcb8860   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2339) FW_SPI: 0x3fcb8870   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2348) SDIO Rx: 0x3fcb8eb1   03 0c 00                                          |...|
+I (2356) H->S BT: 0x3fcb8eb1   03 0c 00                                          |...|
+I (2383) FW_SPI: 0x3fcb9fec   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2383) FW_SPI: 0x3fcb9ffc   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2400) FW_SPI: 0x3fc9df30   02 00 00 00 07 00 0c 00  3f 00 00 00 04 0e 04 05  |........?.......|
+I (2401) FW_SPI: 0x3fc9df40   03 0c 00 00 0f 02 00 00  00 00 00 00 28 df c9 3f  |............(..?|
+I (2418) FW_SPI: 0x3fcb8ea4   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2420) FW_SPI: 0x3fcb8eb4   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2431) SDIO Rx: 0x3fcb9ff9   03 10 00                                          |...|
+I (2439) H->S BT: 0x3fcb9ff9   03 10 00                                          |...|
+I (2466) FW_SPI: 0x3fcb8860   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2466) FW_SPI: 0x3fcb8870   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2482) FW_SPI: 0x3fc9dfac   02 00 00 00 0f 00 0c 00  b3 00 00 00 04 0e 0c 05  |................|
+I (2484) FW_SPI: 0x3fc9dfbc   03 10 00 00 00 00 00 60  00 00 00 3f 95 05 00 00  |.......`...?....|
+I (2496) FW_SPI: 0x3fcb8860   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2503) FW_SPI: 0x3fcb8870   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2514) SDIO Rx: 0x3fcb8eb1   01 10 00                                          |...|
+I (2521) H->S BT: 0x3fcb8eb1   01 10 00                                          |...|
+I (2549) FW_SPI: 0x3fcb9fec   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2549) FW_SPI: 0x3fcb9ffc   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2566) FW_SPI: 0x3fc9dfac   02 00 00 00 0f 00 0c 00  76 01 00 00 04 0e 0c 05  |........v.......|
+I (2567) FW_SPI: 0x3fc9dfbc   01 10 00 09 16 00 09 e5  02 16 00 3f 95 05 00 00  |...........?....|
+I (2583) FW_SPI: 0x3fcb8ea4   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2586) FW_SPI: 0x3fcb8eb4   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2597) SDIO Rx: 0x3fcb9ff9   09 10 00                                          |...|
+I (2604) H->S BT: 0x3fcb9ff9   09 10 00                                          |...|
+I (2632) FW_SPI: 0x3fcb8860   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2632) FW_SPI: 0x3fcb8870   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2649) FW_SPI: 0x3fc9dfac   02 00 00 00 0d 00 0c 00  37 05 00 00 04 0e 0a 05  |........7.......|
+I (2650) FW_SPI: 0x3fc9dfbc   09 10 00 ca 80 f6 bd f5  f0 df c9 3f 95 05 00 00  |...........?....|
+I (2667) FW_SPI: 0x3fcb8860   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2669) FW_SPI: 0x3fcb8870   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2680) SDIO Rx: 0x3fcb8eb1   02 10 00                                          |...|
+I (2687) H->S BT: 0x3fcb8eb1   02 10 00                                          |...|
+I (2715) FW_SPI: 0x3fcb9fec   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (2715) FW_SPI: 0x3fcb9ffc   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (80729) FW_SPI: 0x3fc9dff8   02 00 00 00 47 00 0c 00  ea 0c 00 00 04 0e 44 05  |....G.........D.|
+I (80730) FW_SPI: 0x3fc9e008   02 10 00 20 00 80 00 00  c0 00 00 00 00 e4 00 00  |... ............|
+I (80739) SDIO Rx: 0x3fcb886c   04 00 00 00 00 00 00 00  ff ff ff ff ff ff 00 00  |................|
+I (80748) SDIO Rx: 0x3fcb887c   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (80757) SDIO Rx: 0x3fcb888c   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (80767) SDIO Rx: 0x3fcb889c   00 00 00 00                                       |....|
+I (80776) Rx Cmd: 0x3fcb886c   04 00 00 00 00 00 00 00  ff ff ff ff ff ff 00 00  |................|
+I (80786) Rx Cmd: 0x3fcb887c   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (80795) Rx Cmd: 0x3fcb888c   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (80805) Rx Cmd: 0x3fcb889c   00 00 00 00                                       |....|
+I (80814) FW_MAIN: Scan request
+
+I (80838) FW_SPI: 0x3fcb8ea4   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (80839) FW_SPI: 0x3fcb8eb4   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (80855) FW_SPI: 0x3fc9e96c   00 00 02 00 08 00 0c 00  1c 00 00 00 04 02 00 00  |................|
+I (80857) FW_SPI: 0x3fc9e97c   00 00 00 00 64 e9 c9 3f  54 00 00 00 88 e9 c9 3f  |....d..?T......?|
+I (80872) FW_SPI: 0x3fc9e19c   00 00 03 00 63 01 0c 00  44 49 00 00 01 01 5f 01  |....c...DI...._.|
+I (80876) FW_SPI: 0x3fc9e1ac   26 5a 4c 99 cd 0a 05 01  b8 ff ff ff 9c 48 d1 04  |&ZL..........H..|
+I (80889) FW_SPI: 0x3fcb8860   00 00 03 00 5c 01 0c 00  f7 45 00 00 01 01 58 01  |....\....E....X.|
+I (80895) FW_SPI: 0x3fcb8870   24 5a 4c 99 cd 0a 05 01  b8 ff ff ff cc 61 d1 04  |$ZL..........a..|
+I (82051) FW_SPI: 0x3fcb9fec   ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (82051) FW_SPI: 0x3fcb9ffc   00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+I (82068) FW_SPI: 0x3fc9e258   00 00 03 00 57 01 0c 00  a3 46 00 00 01 01 53 01  |....W....F....S.|
+I (82069) FW_SPI: 0x3fc9e268   26 5a 4c 99 d2 4a 05 0b  c5 ff ff ff 6e bd e3 04  |&ZL..J......n...|
+```
+
+The logs from the host : 
+```
+[ 3498.090000] esp32_spi: spi_dev_init: ESP32 peripheral is registered to SPI bus [1],chip select [0], SPI Clock [1]
+[ 3499.560000] spi_data_ready_interrupt_handler
+[ 3499.560000] spi_interrupt_handler
+[ 3499.580000] esp32_spi: process_esp_bootup_event: Received ESP bootup event
+[ 3499.580000] spi_interrupt_handler
+[ 3499.590000] esp32_spi: process_event_esp_bootup: Bootup Event tag: 3
+[ 3499.600000] esp32_spi: esp_validate_chipset: Chipset=ESP32-C3 ID=05 detected over SPI
+[ 3499.610000] esp32_spi: process_event_esp_bootup: Bootup Event tag: 2
+[ 3499.610000] esp32_spi: process_event_esp_bootup: Bootup Event tag: 0
+[ 3499.620000] esp32_spi: process_event_esp_bootup: Bootup Event tag: 1
+[ 3499.630000] esp32_spi: process_fw_data: ESP chipset's last reset cause:
+[ 3499.630000] esp32_spi: print_reset_reason: POWERON_RESET
+[ 3499.640000] esp32_spi: check_esp_version: ESP Firmware version: 1.0.3
+[ 3499.650000] esp32_spi: esp_reg_notifier: Driver init is ongoing
+[ 3499.710000] spi_data_ready_interrupt_handler
+[ 3499.730000] spi_interrupt_handler
+[ 3499.750000] spi_interrupt_handler
+[ 3499.760000] spi_interrupt_handler
+[ 3499.810000] spi_data_ready_interrupt_handler
+[ 3499.830000] spi_interrupt_handler
+[ 3499.840000] spi_interrupt_handler
+[ 3499.870000] spi_interrupt_handler
+[ 3499.940000] spi_data_ready_interrupt_handler
+[ 3499.960000] spi_interrupt_handler
+[ 3499.980000] spi_interrupt_handler
+[ 3500.200000] esp32_spi: init_bt: ESP Bluetooth init
+[ 3500.200000] esp32_spi: print_capabilities: Capabilities: 0xe8. Features supported are:
+[ 3500.210000] esp32_spi: print_capabilities: 	 * WLAN on SPI
+[ 3500.220000] esp32_spi: print_capabilities: 	 * BT/BLE
+[ 3500.220000] esp32_spi: print_capabilities: 	   - HCI over SPI
+[ 3500.230000] esp32_spi: print_capabilities: 	   - BLE only
+[ 3500.250000] spi_interrupt_handler
+[ 3500.280000] spi_data_ready_interrupt_handler
+[ 3500.300000] spi_interrupt_handler
+[ 3500.310000] spi_interrupt_handler
+[ 3500.330000] spi_interrupt_handler
+[ 3500.360000] spi_data_ready_interrupt_handler
+[ 3500.380000] spi_interrupt_handler
+[ 3500.410000] spi_interrupt_handler
+[ 3500.450000] spi_data_ready_interrupt_handler
+[ 3500.460000] spi_interrupt_handler
+[ 3500.480000] spi_interrupt_handler
+[ 3500.530000] spi_data_ready_interrupt_handler
+[ 3500.550000] spi_interrupt_handler
+[ 3500.560000] spi_interrupt_handler
+[ 3500.580000] spi_interrupt_handler
+[ 3500.610000] spi_data_ready_interrupt_handler
+[ 3502.640000] Bluetooth: hci0: Opcode 0x1002 failed: -110
+[ 3578.640000] spi_interrupt_handler
+[ 3578.740000] spi_data_ready_interrupt_handler
+[ 3578.750000] spi_interrupt_handler
+[ 3578.770000] spi_interrupt_handler
+[ 3578.790000] spi_interrupt_handler
+[ 3578.800000] spi_interrupt_handler
+[ 3579.950000] spi_data_ready_interrupt_handler
+[ 3579.970000] spi_interrupt_handler
+```
+
+And the command I ran fron the host to get this logs : 
+
+```
+modprobe esp32_spi resetpin=97 clockspeed=1
+# ip link show espsta0
+# ip link set dev espsta0 up
+12: espsta0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000
+    link/ether f0:f5:bd:f6:80:c8 brd ff:ff:ff:ff:ff:ff
+# iw espsta0 scan
+```
+
+I'm wondering if you have any idea !

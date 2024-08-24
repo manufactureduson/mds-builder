@@ -49,12 +49,22 @@
 
 			partition@0 {
 				label = "boot";
-				reg = <0 0x100000>; // 1 MiB
+				reg = <0 0x100000>;
 			};
 
 			partition@100000 {
+				label = "fota";
+				reg = <0x0100000 0x0f00000>;
+			};
+
+			partition@1000000 {
 				label = "rootfs";
-				reg = <0x100000 0x7F00000>; // 127 MiB
+				reg = <0x1000000 0x3800000>;
+			};
+
+			partition@4800000 {
+				label = "data";
+				reg = <0x4800000 0x3800000>;
 			};
 		};
 	};
