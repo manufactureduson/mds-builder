@@ -15,7 +15,6 @@ endif
 # Use containerized environment
 DOCKER?=0
 
-
 DOCKER_IMAGE_NAME ?= mds_builder_image
 DOCKER_TAG ?= latest
 DOCKER_COMMAND := docker run -it --rm \
@@ -24,7 +23,7 @@ DOCKER_COMMAND := docker run -it --rm \
 		--workdir="$(CURDIR)" \
 		$(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
 
-BUILDROOT_VERSION ?= 2024.02.2
+BUILDROOT_VERSION ?= 2024.08-rc3
 
 MACHINE ?= network_player
 
