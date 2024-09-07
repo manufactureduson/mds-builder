@@ -39,8 +39,8 @@ jobs:
           context: .
           # Note: tags has to be all lower-case
           tags: |
-            ghcr.io/naguirre/mds-builder:latest 
-            ghcr.io/naguirre/mds-builder:${{ github.sha }}
+            ghcr.io/manufactureduson/mds-builder:latest 
+            ghcr.io/manufactureduson/mds-builder:${{ github.sha }}
           push: ${{ github.ref == 'refs/heads/main' }}
           platforms: linux/amd64
 
