@@ -4,6 +4,9 @@ on:
   # run it on push to the default repository branch
   push:
     branches: [main]
+    paths:
+      - Dockerfile
+
 
 jobs:
   # define job to build and publish docker image
@@ -40,7 +43,6 @@ jobs:
           # Note: tags has to be all lower-case
           tags: |
             ghcr.io/manufactureduson/mds-builder:latest 
-            ghcr.io/manufactureduson/mds-builder:${{ github.sha }}
           push: ${{ github.ref == 'refs/heads/main' }}
           platforms: linux/amd64
 
