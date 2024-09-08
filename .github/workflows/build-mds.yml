@@ -10,9 +10,6 @@ jobs:
       options: --user build
       
     steps:
-      - name: work around permission issue
-        run: git config --global --add safe.directory /__w/mds-builder/mds-builder
-
       - name: Checkout code
         uses: actions/checkout@v4
 
