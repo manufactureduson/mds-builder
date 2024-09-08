@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/manufactureduson/mds-builder:latest 
-      options: --user root
+      options: --user build
       
     steps:
       - name: work around permission issue
