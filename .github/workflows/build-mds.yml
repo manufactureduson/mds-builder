@@ -1,0 +1,13 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+jobs:
+  container-test-job:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/manufactureduson/mds-builder:latest 
+      
+    steps:
+      - name: build
+        run: make build MACHINE=network_player
