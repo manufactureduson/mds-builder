@@ -102,13 +102,14 @@ distrib: ${DESTDIR} ## Copy the output binary of Agenium into a distribution dir
 distrib-clean: ## Remove the distribution directory
 	rm -rf ${DESTDIR}
 
-### DOWNLOADS Buildroot ###
+### DOWNLOAD Buildroot ###
+.stamp-br-downloads:
+	@echo ">>> Download buildroot source code"
+	$(PREFIX) mkdir -p build
+	$(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xvz -C build/
+	touch .stamp-br-downloads
 
-br-downloads: ## Download buildroot source code
-	#@echo ">>> Download buildroot source code"
-	#$(PREFIX) mkdir -p build
-	#$(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xvz -C build/
-	
+br-downloads: .stamp-br-downloads ## Download buildroot source code
 .PHONY: br-downloads
 
 ### bootstrap ###
