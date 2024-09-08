@@ -18,4 +18,4 @@ jobs:
       options: --user build
     steps:
       - name: build
-        run: make build MACHINE=network_player
+        run: pwd && ls-alh && make build MACHINE=network_player
