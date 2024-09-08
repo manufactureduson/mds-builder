@@ -3,20 +3,17 @@ on:
   push:
     branches: [ main ]
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: fixup permissions
-        run: chown -R 1000:1000 .
-
-  build: 
+  container-test-job:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/manufactureduson/mds-builder:latest 
       options: --user build
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: fixup permissions
+        run: sudo chown -R 1000:1000 .
+
       - name: build
         run: make build MACHINE=network_player
