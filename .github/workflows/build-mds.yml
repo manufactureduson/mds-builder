@@ -3,19 +3,20 @@ on:
   push:
     branches: [ main ]
 jobs:
-  checkout:
+  :
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: fixup permissions
-        run: sudo chown -R 1000:1000 .
-  build:
-    runs-on: ubuntu-latest
-    needs: checkout
-    container:
-      image: ghcr.io/manufactureduson/mds-builder:latest 
-      options: --user build
-    steps:
+
+      - name: install dependencies
+        run: |
+            sudo apt-get install -y make build-essential bash bc binutils build-essential bzip2 \
+              git zsh curl cpio g++ gcc git gzip locales libncurses5-dev libdevmapper-dev \
+              libsystemd-dev make mercurial whois patch perl python3 rsync sed \
+              tar vim unzip wget bison flex libssl-dev libfdt-dev curl file swig \
+              u-boot-tools python3-setuptools python3-dev
+
       - name: build
-        run: pwd && ls-alh && make build MACHINE=network_player
+        run: make build MACHINE=network_player
