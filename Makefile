@@ -106,7 +106,7 @@ distrib-clean: ## Remove the distribution directory
 .stamp-br-downloads:
 	@echo ">>> Download buildroot source code"
 	$(PREFIX) mkdir -p build
-	$(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xvz -C build/
+	$(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xz -C build/
 	touch .stamp-br-downloads
 
 br-downloads: .stamp-br-downloads ## Download buildroot source code
@@ -124,7 +124,7 @@ docker-image: Dockerfile ## Build Docker image
 		--build-arg="USER_UID=$(shell id -u)" \
 		--build-arg="USER_GID=$(shell id -g)" \
 		--build-arg="PROJECT_PATH=$(CURDIR)" \
-		--tag=$(DOCKER_IMAGE_NAME):$(DOCKER_TAG) \
+		--tag=$(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
 		.
 .PHONY: docker-image
 
