@@ -3,9 +3,8 @@ on:
   push:
     branches: [ main ]
 jobs:
-  container-test-job:
+  prepare:
     runs-on: ubuntu-latest
-      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -13,8 +12,11 @@ jobs:
       - name: fixup permissions
         run: chown -R 1000:1000 .
 
+  build: 
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/manufactureduson/mds-builder:latest 
+      options: --user build
+    steps:
       - name: build
-        container:
-          image: ghcr.io/manufactureduson/mds-builder:latest 
-          options: --user build
         run: make build MACHINE=network_player
