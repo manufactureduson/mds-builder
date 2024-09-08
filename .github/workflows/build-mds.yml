@@ -9,5 +9,8 @@ jobs:
       image: ghcr.io/manufactureduson/mds-builder:latest 
       
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: build
         run: make build MACHINE=network_player
