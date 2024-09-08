@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/manufactureduson/mds-builder:latest 
+      options: --user root
       
     steps:
       - name: Checkout code
