@@ -124,7 +124,7 @@ docker-image: Dockerfile ## Build Docker image
 		--build-arg="USER_UID=$(shell id -u)" \
 		--build-arg="USER_GID=$(shell id -g)" \
 		--build-arg="PROJECT_PATH=$(CURDIR)" \
-		--tag=$(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
+		--tag=$(DOCKER_IMAGE_NAME):$(DOCKER_TAG) \
 		.
 .PHONY: docker-image
 
