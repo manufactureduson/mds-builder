@@ -1,0 +1,41 @@
+{
+    "name": "MDS ▸ mds_builder",
+    "image": "mds_builder_image:latest",
+    "initializeCommand": "make docker-image",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "workspaceFolder": "/workspace",
+    "containerUser": "build",
+    "updateRemoteUserUID": true,
+    "shutdownAction": "stopContainer",
+    "mounts": [
+        "source=mds-builder-build,target=/workspace/build,type=volume",
+        "source=mds-builder-dl,target=/workspace/dl,type=volume",
+        "source=fps_functional_checkout_vscode_extensions,target=/home/vscode/.vscode-server/extensions,type=volume",
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.makefile-tools",
+                "plorefice.devicetree",
+                "ms-vscode.vscode-serial-monitor",
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "mhutchie.git-graph",
+                "github.copilot",
+                "github.copilot-chat",
+                "ms-vscode.hexeditor"
+            ],
+            "settings": {
+                "terminal.integrated.fontFamily": "meslolgs nf",
+                "terminal.integrated.profile.linux": {
+                    "zsh": {
+                        "path": "/bin/zsh"
+                    }
+                },
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.cwd": "/workspace"
+            }
+        }
+    }
+}
