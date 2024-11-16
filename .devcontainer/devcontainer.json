@@ -1,7 +1,7 @@
 {
     "name": "MDS ▸ mds_builder",
     "image": "mds_builder_image:latest",
-    "initializeCommand": "make docker-image",
+    "initializeCommand": "make container-image",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
     "workspaceFolder": "/workspace",
     "containerUser": "build",

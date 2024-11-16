@@ -13,17 +13,18 @@ include user.env
 endif
 
 # Use containerized environment
-DOCKER?=0
+CONTAINER?=0
+CONTAINER_ENGINE ?= docker
 
-DOCKER_IMAGE_NAME ?= mds_builder_image
-DOCKER_TAG ?= latest
-DOCKER_COMMAND := docker run -it --rm \
+CONTAINER_IMAGE_NAME ?= mds_builder_image
+CONTAINER_TAG ?= latest
+CONTAINER_COMMAND := ${CONTAINER_ENGINE} run -it --rm \
 		--volume="$(CURDIR):$(CURDIR)" \
 		-v mds-builder-build:$(CURDIR)/build \
 		--workdir="$(CURDIR)" \
-		$(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
+		$(CONTAINER_IMAGE_NAME):$(CONTAINER_TAG)
 
-BUILDROOT_VERSION ?= 2024.08-rc3
+BUILDROOT_VERSION ?= 2024.08
 
 MACHINE ?= network_player
 
@@ -33,9 +34,9 @@ OUTPUT_DIR?=../output/${MACHINE}
 EXTERNAL_REPOSITORIES?=../../mds_external
 BUILD_VERSION ?=  $(shell git describe --tags --dirty --always)
 
-ifeq ($(DOCKER), 1)
-	DEPS = docker-image
-	PREFIX = $(DOCKER_COMMAND)
+ifeq ($(CONTAINER), 1)
+	DEPS = container-image
+	PREFIX = $(CONTAINER_COMMAND)
 else
 	DEPS =
 	PREFIX =
@@ -103,45 +104,40 @@ distrib-clean: ## Remove the distribution directory
 	rm -rf ${DESTDIR}
 
 ### DOWNLOAD Buildroot ###
-.stamp-br-downloads:
+build/.stamp-br-downloads:
 	@echo ">>> Download buildroot source code"
 	$(PREFIX) mkdir -p build
-	$(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xz -C build/
-	touch .stamp-br-downloads
+	git clone https://gitlab.com/buildroot.org/buildroot.git build/buildroot-${BUILDROOT_VERSION}
+	git -C build/buildroot-${BUILDROOT_VERSION} checkout ${BUILDROOT_VERSION}
+	### $(PREFIX) curl -s https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz | tar xz -C build/
+	touch build/.stamp-br-downloads
 
-br-downloads: .stamp-br-downloads ## Download buildroot source code
+br-downloads: build/.stamp-br-downloads ## Download buildroot source code
 .PHONY: br-downloads
 
 ### bootstrap ###
 bootstrap:
 	sh ./bootstrap.sh
 
-### DOCKER RULES ###
+### CONTAINER RULES ###
 
-docker-image: Dockerfile ## Build Docker image
-	@docker build \
+container-image: Dockerfile ## Build Docker image
+	@${CONTAINER_ENGINE} build \
 		--ssh=default \
 		--build-arg="USER_UID=$(shell id -u)" \
 		--build-arg="USER_GID=$(shell id -g)" \
 		--build-arg="PROJECT_PATH=$(CURDIR)" \
-		--tag=$(DOCKER_IMAGE_NAME):$(DOCKER_TAG) \
+		--tag=$(CONTAINER_IMAGE_NAME):$(CONTAINER_TAG) \
 		.
-.PHONY: docker-image
+.PHONY: container-image
 
-docker-shell: docker-image ## Run shell in container
-	@$(DOCKER_COMMAND) /bin/bash
-.PHONY: docker-shell
+containter-shell: container-image ## Run shell in container
+	@$(CONTAINER_COMMAND) /bin/bash
+.PHONY: container-shell
 
-docker-rm: ## Remove Docker image
-	@docker image rm $(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
-.PHONY: docker-rm
-
-### Containers rules ###
-container:
-	cd evil &&  docker buildx build --platform linux/arm32v7 --tag software-package-evil:latest .
-	skopeo copy --override-os linux --override-arch arm32v7  docker-daemon:software-package-evil:latest oci:software-package-evil:latest
-	umoci raw unpack --rootless --image alpine build/software-package-evil
-	cd build/software-package-evil && tar -Jcvf ../software-package-evil.tar.gz .
+container-rm: ## Remove Docker image
+	@${CONTAINER_ENGINE} image rm $(CONTAINER_IMAGE_NAME):$(CONTAINER_TAG)
+.PHONY: container-rm
 
 ### SUPPORT RULES ###
 help:           ## Show this help.
@@ -149,7 +145,7 @@ help:           ## Show this help.
 .PHONY: help
 
 .EXPORT_ALL_VARIABLES:
-DOCKER_BUILDKIT = 1
-COMPOSE_DOCKER_CLI_BUILD = 1
+CONTAINER_BUILDKIT = 1
+COMPOSE_CONTAINER_CLI_BUILD = 1
 
 .DEFAULT_GOAL := help
