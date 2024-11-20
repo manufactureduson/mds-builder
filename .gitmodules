@@ -1,3 +1,5 @@
 [submodule "src/esp-hosted"]
 	path = src/esp-hosted
-	url = https://github.com/espressif/esp-hosted.git
+	url = https://github.com/naguirre/esp-hosted.git
+	branch = users/nico/mds_integration
+	ignore = all
