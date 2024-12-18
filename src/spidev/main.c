@@ -92,6 +92,7 @@ int _transfer_file(int spidev, char *file_in, char *file_out, int speed) {
   FILE *fout = fopen(file_out, "w");
   if (fout == NULL) {
     perror("fopen");
+    printf("Error opening file %s\n", file_out);
     return EXIT_FAILURE;
   }
   /* Open the file and mmap it */

@@ -34,7 +34,8 @@
                     }
                 },
                 "terminal.integrated.defaultProfile.linux": "zsh",
-                "terminal.integrated.cwd": "/workspace"
+                "terminal.integrated.cwd": "/workspace",
+                "rust-analyzer.rustc.source": "src/mds-config"
             }
         }
     }

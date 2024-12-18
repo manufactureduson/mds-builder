@@ -1,14 +1,14 @@
 # bootstrap
 
 Bootstrap process consist to run an initial software on the board and from this software, flash the final software.
-This software is build with the machine mds_network_bootstrap. We need first to buiild it : 
+This software is build with the machine mds_network_bootstrap. We need first to buiild it :
 ```bash
 make build MACHINE=mds_network_bootstrap
 ```
 
 the output files are located in out/mds_network_bootstrap
 
-Once the image is build, we can run `bootstrap.sh` script to load the image in the RAM and execute u-boot on it. This script will also load uImage and the rootfsimage in the RAM. 
+Once the image is build, we can run `bootstrap.sh` script to load the image in the RAM and execute u-boot on it. This script will also load uImage and the rootfsimage in the RAM.
 
 It uses the sunxi-fel tool to load the image in the RAM. This tool is available in the sunxi-tools package. It's possible to build it for macos aswell.
 
@@ -19,7 +19,7 @@ The bootstrap script takes a serial console as argument to interrupt the boot pr
 ```
 
 Once the prompt display Staring U-Boot (0x81700000).
-We can open a console on the device : 
+We can open a console on the device :
 ```
 picocom -b 115200 /dev/tty.usbserial-FTA02VH8
 ```
@@ -32,7 +32,7 @@ We should also be able to connect the board trough ssh with the root user and th
 
 # Flashing the board
 
-We need first to format the flash memory of the board. We can do it with the following command : 
+We need first to format the flash memory of the board. We can do it with the following command :
 ```bash
 
 flash_erase /dev/mtd0 0 0
@@ -41,7 +41,7 @@ flash_erase /dev/mtd2 0 0
 flash_erase /dev/mtd3 0 0
 
 ```
-Then we can attach ubi partition to the mtd device : 
+Then we can attach ubi partition to the mtd device :
 ```bash
 ubiformat /dev/mtd1
 ubiformat /dev/mtd2
@@ -55,12 +55,12 @@ ubiattach -p /dev/mtd2
 ubiattach -p /dev/mtd3
 ```
 
-Generate partitions 
+Generate partitions
 ```
 ubimkvol /dev/ubi0 -N fota -m
 ubimkvol /dev/ubi1 -N rootfs -m
 ubimkvol /dev/ubi2 -N data -m
-mkdir /mnt/fota /mnt/rootfs /mnt/data 
+mkdir /mnt/fota /mnt/rootfs /mnt/data
 
 mount -t ubifs /dev/ubi2_0    /mnt/data
 ```
@@ -79,4 +79,3 @@ ubiupdatevol /dev/ubi1_0 /mnt/data/rootfs.ubifs
 ```
 
 Then we can reboot the board and the new software should be running on the board.
-
