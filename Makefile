@@ -24,7 +24,7 @@ CONTAINER_COMMAND := ${CONTAINER_ENGINE} run -it --rm \
 		--workdir="$(CURDIR)" \
 		$(CONTAINER_IMAGE_NAME):$(CONTAINER_TAG)
 
-BUILDROOT_VERSION ?= 2024.08
+BUILDROOT_VERSION ?= 2024.11
 
 MACHINE ?= network_player
 
@@ -91,12 +91,6 @@ DESTDIR?=./build/distribution/${MACHINE}
 
 ${DESTDIR}:
 	mkdir -p ${DESTDIR}
-
-distrib: ${DESTDIR} ## Copy the output binary of Agenium into a distribution directory. Destination directory can be overriden by setting DESTDIR variable . e.g DESTDIR=build/agenium make distrib-agenium
-	mkdir -p ${DESTDIR}/image
-	mkdir -p ${DESTDIR}/sdk
-	cp build/output/${MACHINE}/images/rootfs.tar.xz ${DESTDIR}/image
-	cp build/output/${MACHINE}/images/sdk-mds-${MACHINE}-${BUILD_VERSION}.tar.gz ${DESTDIR}/sdk
 
 .PHONY: distrib
 
