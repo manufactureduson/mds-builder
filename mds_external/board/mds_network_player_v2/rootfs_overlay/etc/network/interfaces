@@ -1,0 +1,17 @@
+auto lo
+iface lo inet loopback
+
+auto wlan0
+iface wlan0 inet dhcp
+    wireless-essid digitalcorner2
+    pre-up modprobe esp32_spi resetpin=97 clockspeed=30
+    pre-up wpa_supplicant -D nl80211 -i wlan0 -c /etc/wpa_supplicant.conf -B
+    post-down killall -q wpa_supplicant
+    post-down modprobe -r esp32_spi
+
+auto usb0
+iface usb0 inet static
+    address 192.168.2.2
+    netmask 255.255.255.0
+    network 192.168.2.0
+    gateway 192.168.2.0

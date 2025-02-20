@@ -1,0 +1,47 @@
+#!/bin/sh
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+NAME=squeezelite
+ZONE_NAME=$(hostname)
+MAC=$(ifconfig -a |grep wlan0 | awk '{print $5}')
+USER=root
+PIDLOCATION=/var/run/$NAME
+PIDFILE=$PIDLOCATION/$NAME.pid
+LOGFILE=/var/log/$NAME.log
+
+start() {
+    echo "Starting squeezelite"
+    ifup wlan0
+    echo none > "/sys/devices/platform/leds/leds/green:status/trigger"
+    echo 0 > "/sys/devices/platform/leds/leds/green:status/brightness"
+    /usr/bin/squeezelite -n "${ZONE_NAME}_${MAC}" -m "${MAC}" -f ${LOGFILE} -z
+}
+
+stop() {
+    echo "Shutting down squeezelite"
+    start-stop-daemon --stop --quiet --pidfile "$PIDFILE" --retry 1 --oknodo
+}
+
+restart() {
+    stop
+    sleep 1
+    start
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        ;;
+esac
+
+exit 0
